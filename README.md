@@ -1,6 +1,8 @@
 # GBCoin
 GBCoin is a cryptocurrency modeled after Bitcoin, the first working cryptocurrency.
 
+http://gbcoin.us
+
 # included papers
 
 Bitcoin White Paper by Satoshi Nakamoto
