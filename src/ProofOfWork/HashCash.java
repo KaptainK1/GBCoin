@@ -1,8 +1,11 @@
+package ProofOfWork;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Random;
+import Utils.SHAUtils;
 
 /**
  * HashCash will be our Proof-of-Work concept which will offer a challenge to the miner to solve

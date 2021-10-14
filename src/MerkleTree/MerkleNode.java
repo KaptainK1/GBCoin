@@ -1,8 +1,9 @@
 package MerkleTree;
 
+import Utils.SHAUtils;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import Utils.SHAUtils;
 
 public class MerkleNode {
 

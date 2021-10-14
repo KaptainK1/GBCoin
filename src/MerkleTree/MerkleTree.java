@@ -1,5 +1,9 @@
 package MerkleTree;
 
+import Model.Transaction;
+import Utils.SHAUtils;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -16,7 +20,7 @@ public class MerkleTree {
     private List<MerkleNode> leafs = new ArrayList<>();
     private ArrayList<MerkleNode> parents = new ArrayList<>();
 
-    public MerkleTree(ArrayList<String> unspentTransactions){
+    public MerkleTree(ArrayList<Transaction> unspentTransactions) throws IOException {
 
         this.size = unspentTransactions.size();
 
@@ -25,19 +29,19 @@ public class MerkleTree {
         System.out.println("Levels: " + this.levels);
 
         //create all the leaf nodes
-        for (String unspentTransaction : unspentTransactions) {
+        for (Transaction unspentTransaction : unspentTransactions) {
             //create a byte buffer and allocate 32 bytes for the hash output of 256
             ByteBuffer b = ByteBuffer.allocate(32);
 
             //we need to covert the data into a byte array by using the byte buffer
             //b.put(unspentTransactions.get(i));
             //b.put(unspentTransaction.getBytes());
-            b.putChar(unspentTransaction.charAt(0));
+            //b.putChar(unspentTransaction.charAt(0));
 
-            byte[] data = unspentTransaction.getBytes();
+            byte[] data = unspentTransaction.toByteArray();
 
             //add the leaf node
-            leafs.add(new MerkleNode(SHAUtils.digest(data, hashingAlgorithm), unspentTransaction, null, null));
+            leafs.add(new MerkleNode(SHAUtils.digest(data, hashingAlgorithm), unspentTransaction.getTitle(), null, null));
 
         }
 
@@ -56,7 +60,7 @@ public class MerkleTree {
     }
 
     //function to build the Merkle Tree from the bottom up
-    public void buildMerkleTree(ArrayList<String> unspentTransactions){
+    public void buildMerkleTree(ArrayList<Transaction> unspentTransactions){
 
         //function to create the immediate parents to our Transaction data blocks
         createDirectParents();
@@ -164,15 +168,26 @@ public class MerkleTree {
         return SHAUtils.digest(data.getBytes(StandardCharsets.UTF_8), hashingAlgorithm);
     }
 
-    public static void main(String[] args){
-        String[] strings = new String[]{"A", "B", "C", "D", "E", "F", "G", "H"};
-        ArrayList<String> test = new ArrayList<String>(
-                Arrays.asList(strings)
-                );
+    public static void main(String[] args) throws IOException {
+//        String[] strings = new String[]{"A", "B", "C", "D", "E", "F", "G", "H"};
+//        ArrayList<String> test = new ArrayList<String>(
+//                Arrays.asList(strings)
+//                );
 
-        System.out.println(test);
+        Transaction tx1 = new Transaction("Test1", 2.00);
+        Transaction tx2 = new Transaction("Test2", 3.00);
+        Transaction tx3 = new Transaction("Test3", 4.00);
+        Transaction tx4 = new Transaction("Test4", 5.00);
+        Transaction tx5 = new Transaction("Test5", 6.00);
+        Transaction tx6 = new Transaction("Test6", 7.00);
 
-        MerkleTree tree = new MerkleTree(test);
+        ArrayList<Transaction> txs = new ArrayList<>(
+                Arrays.asList(tx1, tx2, tx3, tx4, tx5, tx6)
+        );
+
+//        System.out.println(test);
+
+        MerkleTree tree = new MerkleTree(txs);
 
         tree.printMerkleTree();
 
