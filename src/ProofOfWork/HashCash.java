@@ -297,14 +297,38 @@ public class HashCash {
         this.resource = resource;
     }
 
+    /**
+     *
+     * @return the full token which is the challenge plus our nonce encoded
+     * @throws Exception We need to throw an exception for if the puzzle has not been solved
+     * therefore there is no full token
+     */
+    public String getToken() throws Exception {
+        //get the full token if it is solved
+        String[] values = this.getChallenge().split(":");
+        if (values[5] == null || values[5].equals("")){
+            throw new Exception("Token has not been solved! It needs to be mined first!");
+        }
+        return this.getChallenge() + generateBase64EncodedString(Long.toString(this.getNonce()));
+    }
+
     public static void main(String[] args){
 
         HashCash hashCash = new HashCash(1,24,"Dylan Hoffman");
         System.out.println(hashCash.getChallenge());
         long start = System.nanoTime();
+
+        // handle the case where if the puzzle has not been solved
+        // thus we don't actually have the token yet!
+        try {
+            hashCash.getToken();
+        } catch (Exception e){
+            System.out.println("Puzzle has not be solved yet");
+        }
+
         hashCash.mine();
 
-        if (HashCash.isValidSolution(hashCash.getChallenge(), Long.toString(hashCash.getNonce()), 20)) {
+        if (HashCash.isValidSolution(hashCash.getChallenge(), Long.toString(hashCash.getNonce()), 24)) {
             System.out.println("Puzzle has valid solution");
             System.out.println(hashCash.getNonce() + " is a valid solution");
         } else {

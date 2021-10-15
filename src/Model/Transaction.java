@@ -1,12 +1,16 @@
 package Model;
 
+import Interfaces.Beautify;
 import Interfaces.HashHelper;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 
-public class Transaction implements Serializable, HashHelper {
+public class Transaction implements Serializable, HashHelper, Beautify {
 
         // The Inner Output class represents outgoing spend transactions
         // so, we need the Public Key of whom the payment should go to
@@ -72,7 +76,7 @@ public class Transaction implements Serializable, HashHelper {
             }
 
             public void setSignature(byte[] signature) {
-                this.signature = signature.clone();
+                this.signature = signature;
             }
 
         }
@@ -144,11 +148,22 @@ public class Transaction implements Serializable, HashHelper {
 
     @Override
     public String toString(){
-        return ("Transaction:" + title + '\n' + "Amount: $" + this.amount);
+        //return ("Transaction:" + title + '\n' + "Amount: $" + this.amount);
+        return this.beautify(this);
     }
 
-    public byte[] getHash() {
-        return hash;
+    public void finalize() {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(this.toByteArray());
+            hash = md.digest();
+        } catch (NoSuchAlgorithmException | IOException x) {
+            x.printStackTrace(System.err);
+        }
+    }
+
+    public byte[] getHash()  {
+        return this.hash;
     }
 
     public void setHash(byte[] hash) {
