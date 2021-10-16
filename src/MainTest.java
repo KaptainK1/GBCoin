@@ -59,7 +59,7 @@ public class MainTest {
         for (int i = 0; i < inputs.size(); i++) {
             System.out.println(inputs.get(i));
 
-            inputs.get(i).addSignature(signature.sign());
+            inputs.get(i).addSignature(signature.sign(), i);
 
         }
 

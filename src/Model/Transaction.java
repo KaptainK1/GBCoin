@@ -47,7 +47,7 @@ public class Transaction implements Serializable, HashHelper, Beautify {
                 this(prevOutputHash, outputIndex, null);
             }
 
-            public void addSignature(byte[] signature){
+            public void addSignature(byte[] signature, int index){
                 setSignature(signature);
             }
 
