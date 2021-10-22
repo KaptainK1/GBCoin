@@ -36,6 +36,7 @@ public class SHAUtils {
 
     }
 
+    /*
     public static byte[] concatenateHash(byte[] leftHash, byte[] rightHash, String algorithm){
 
         //create three BigIntegers, 2 to store the hashes from the input and
@@ -50,14 +51,15 @@ public class SHAUtils {
         return SHAUtils.digest(finalHashInt.toByteArray(), algorithm);
     }
 
+     */
+
+    /*
     public static void main(String[] args){
 
         String alg = "SHA-256";
 
         String text = "323";
         String text1 = "465";
-
-
 
         System.out.println("Input is: " + text + " length is " + text.length());
 
@@ -66,20 +68,9 @@ public class SHAUtils {
 
         System.out.println("hex value is " + bytesToHex(shaInBytes) + " length is " + shaInBytes.length);
         System.out.println("hex value is " + bytesToHex(shaInBytes1) + " length is " + shaInBytes1.length);
-
-        BigInteger firstInt = new BigInteger(shaInBytes);
-        BigInteger secondInt = new BigInteger(shaInBytes1);
-
-        BigInteger finalInt = firstInt.add(secondInt);
-        System.out.println("Big int is " + finalInt);
-
-        byte[] finalHash = SHAUtils.digest(finalInt.toByteArray(), alg);
-
-        System.out.println("hex value is " + bytesToHex(finalHash) + " length is " + finalHash.length);
-        System.out.println(finalInt.bitCount());
-
-
     }
+
+     */
 
 
 

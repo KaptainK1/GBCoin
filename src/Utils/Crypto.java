@@ -1,6 +1,7 @@
 package Utils;
 
 import java.security.*;
+import java.util.Base64;
 
 public class Crypto {
     public static boolean verifySignature(PublicKey publicKey, byte[] message, byte[] signature){
@@ -16,6 +17,7 @@ public class Crypto {
             e.printStackTrace();
         }
         try{
+            //System.out.println("Here!");
             sig.update(message);
             return sig.verify(signature);
         } catch (SignatureException e){
@@ -24,4 +26,20 @@ public class Crypto {
 
         return false;
     }
+
+    public static byte[] signMessage(PrivateKey privateKey, byte[] messageToSign) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        signature.update(messageToSign);
+        return signature.sign();
+
+    }
+
+
+    public static String getStringFromKey(Key key){
+        return Base64.getEncoder().encodeToString(key.getEncoded());
+    }
+
+
 }
