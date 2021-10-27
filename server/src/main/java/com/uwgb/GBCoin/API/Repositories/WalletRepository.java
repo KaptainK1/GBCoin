@@ -1,4 +1,4 @@
-package com.uwgb.GBCoin.MSQLHelpers;
+package com.uwgb.GBCoin.API.Repositories;
 
 import com.uwgb.GBCoin.Model.Wallet;
 import org.springframework.data.jpa.repository.JpaRepository;

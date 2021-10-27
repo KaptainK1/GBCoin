@@ -1,10 +1,8 @@
 package com.uwgb.GBCoin.MSQLHelpers;
 
 import com.mysql.cj.util.Base64Decoder;
-import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.type.AbstractSingleColumnStandardBasicType;
-import org.hibernate.type.descriptor.java.JavaTypeDescriptor;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
 
 import org.hibernate.type.descriptor.WrapperOptions;
@@ -12,27 +10,26 @@ import org.hibernate.type.descriptor.java.AbstractTypeDescriptor;
 import org.hibernate.type.descriptor.java.ImmutableMutabilityPlan;
 import org.hibernate.type.descriptor.spi.JdbcRecommendedSqlTypeMappingContext;
 
-import javax.crypto.SecretKey;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.security.*;
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.util.Properties;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import static java.lang.Class.forName;
+
 
 public class KeyDescriptor extends AbstractTypeDescriptor<java.security.Key> {
 
     protected KeyDescriptor() {
         super(java.security.Key.class, new ImmutableMutabilityPlan<>());
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override
@@ -74,12 +71,12 @@ public class KeyDescriptor extends AbstractTypeDescriptor<java.security.Key> {
     }
 
     @Override
-    public <X> java.security.Key wrap(X value, WrapperOptions options) {
+    public <X> Key wrap(X value, WrapperOptions options) {
 
-        System.out.println(value);
         Blob blob = (Blob) value;
         byte[] bytes = new byte[0];
         byte[] decodedKey = new byte[0];
+        PublicKey publicKey = null;
         
         try {
             bytes = blob.getBytes(1, (int) blob.length());
@@ -87,25 +84,31 @@ public class KeyDescriptor extends AbstractTypeDescriptor<java.security.Key> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        KeyFactory keyFactory = null;
-        try {
-            keyFactory = KeyFactory.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        
-        PublicKey key = null;
-        RSAPublicKey rsaPubKey = null;
 
-        try {
-            assert keyFactory != null;
-            rsaPubKey = (RSAPublicKey )keyFactory.generatePublic( new X509EncodedKeySpec(decodedKey));
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
+        String keyAsString = new String(decodedKey, StandardCharsets.UTF_8);
+
+        try (
+            Reader reader = new StringReader(keyAsString);
+            PemReader pemReader = new PemReader(reader);
+        ) {
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            PemObject pemObject = pemReader.readPemObject();
+            byte[] keyContentAsBytesFromBC = pemObject.getContent();
+            X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyContentAsBytesFromBC);
+            publicKey = fact.generatePublic(pubKeySpec);
+
+//            byte[] encodedKey = publicKey.getEncoded();
+//            String base64Key = Base64.getEncoder().encodeToString(encodedKey);
+
+            String encodedKey = new String(bytes);
+
+            System.out.println(encodedKey);
+            //return publicKey;
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
 
-        return rsaPubKey;
+        return publicKey;
     }
 
     @Override
