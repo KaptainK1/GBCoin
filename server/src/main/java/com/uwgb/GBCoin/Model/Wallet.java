@@ -19,11 +19,11 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long ID;
 
-
-    @Type(type = "com.uwgb.GBCoin.MSQLHelpers.Key")
+    //@Type(type = "com.uwgb.GBCoin.MSQLHelpers.Key")
+    @Lob
     private final PublicKey publicKey;
 
-    @Type(type = "com.uwgb.GBCoin.MSQLHelpers.Key")
+    @Lob
     private final PrivateKey privateKey;
 
     public Wallet() throws Exception {
