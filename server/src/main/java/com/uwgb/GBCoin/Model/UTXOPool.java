@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-public class UXTOPool {
+public class UTXOPool {
 
     /**
      * the UTXOPool is a data structure to hold all the transaction outputs
@@ -12,8 +12,12 @@ public class UXTOPool {
      */
     private HashMap<UTXO, Transaction.Output> utxoPool;
 
-    public UXTOPool(){
+    public UTXOPool(){
         utxoPool = new HashMap<>();
+    }
+
+    public UTXOPool(UTXOPool utxoPool){
+        this.utxoPool = new HashMap<>(utxoPool.utxoPool);
     }
 
     /**
