@@ -39,6 +39,15 @@ public class UTXOPool {
     }
 
     /**
+     *
+     * @param utxo
+     * @return return the utxo's corresponding output
+     */
+    public Transaction.Output getTxOutput(UTXO utxo){
+        return utxoPool.get(utxo);
+    }
+
+    /**
      * method to check if an utxo is available to spend
      * if it is in the pool, then it is available, otherwise it may have been spent already
      * or simply does not exist. either way it could be a malicious spend attack

@@ -47,6 +47,22 @@ public class Transaction implements HashHelper, Beautify {
                     builder.append("\n");
                     return builder.toString();
                 }
+
+            public PublicKey getPublicKey() {
+                return publicKey;
+            }
+
+            public void setPublicKey(PublicKey publicKey) {
+                this.publicKey = publicKey;
+            }
+
+            public double getValue() {
+                return value;
+            }
+
+            public void setValue(double value) {
+                this.value = value;
+            }
         }
 
         public class Input implements Beautify{
@@ -152,6 +168,7 @@ public class Transaction implements HashHelper, Beautify {
         this.getInputs().remove(index);
     }
 
+    // below code needs to be removed eventually, as its a placeholder for the merkle tree
     public double getAmount() {
         return amount;
     }
@@ -175,6 +192,7 @@ public class Transaction implements HashHelper, Beautify {
         this.amount = amount;
         this.title = title;
     }
+    // above code needs to be removed eventually, as its a placeholder for the merkle tree
 
     public byte[] getDataToSign(int inputIndex){
         // get the specified input and all of its outputs
