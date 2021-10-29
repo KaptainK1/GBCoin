@@ -73,7 +73,7 @@ public class HashCash {
 
     /**
      *
-     * @param size the amount of characters we want the random seed string to be
+     * @param size the amount osf characters we want the random seed string to be
      * @return //create a new random string and return the Base64 encoded version of it
      */
 
