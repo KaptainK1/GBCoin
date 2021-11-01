@@ -23,7 +23,7 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     private BlockChain blockChain;
     private HashCash hashCash;
     private TransactionHandler transactionHandler;
-    private static UTXOPool utxoPool;
+    private UTXOPool utxoPool;
     private List<Transaction> newTransactions;
 
     public Miner(MinerNetwork minerNetwork, TransactionNetwork transactionNetwork, HashSet<Miner> adjacentMiners, PublicKey publicKey, BlockChain blockChain) {
@@ -103,6 +103,11 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     @Override
     public boolean validateTransactions() {
         return false;
+    }
+
+    @Override
+    public void receiveTransaction(byte[] privateKey, byte[] publicKey, double amount) {
+        
     }
 
     @Override
