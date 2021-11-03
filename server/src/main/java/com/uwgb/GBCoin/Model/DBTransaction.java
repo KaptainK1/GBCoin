@@ -23,6 +23,8 @@ public class DBTransaction {
 
     public DBTransaction(long id, byte[] privateKey, byte[] publicKey, double amount, double transactionFee) {
         Id = id;
+        assert(transactionFee >= 0);
+        assert(amount > 0);
         this.privateKey = privateKey;
         this.publicKey = publicKey;
         this.amount = amount;
@@ -30,6 +32,8 @@ public class DBTransaction {
     }
 
     public DBTransaction(byte[] privateKey, byte[] publicKey, double amount, double transactionFee) {
+        assert(transactionFee >= 0);
+        assert(amount > 0);
         this.privateKey = privateKey;
         this.publicKey = publicKey;
         this.amount = amount;

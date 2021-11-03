@@ -1,7 +1,6 @@
 package com.uwgb.GBCoin.API.Controllers;
 
 import com.uwgb.GBCoin.API.Services.TransactionService;
-import com.uwgb.GBCoin.Exceptions.ResouceNotFoundException;
 import com.uwgb.GBCoin.Model.DBTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
