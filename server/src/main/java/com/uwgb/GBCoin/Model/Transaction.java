@@ -323,7 +323,8 @@ public class Transaction implements HashHelper, Beautify {
         return this.beautify(this);
     }
 
-    public void finalize() {
+    @Override
+    public void hashObject() throws IOException {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(this.toByteArray());
