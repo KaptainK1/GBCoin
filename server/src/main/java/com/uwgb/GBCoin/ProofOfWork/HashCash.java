@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Random;
+
+import com.uwgb.GBCoin.Miner.MinerNetwork;
 import com.uwgb.GBCoin.Utils.SHAUtils;
 
 /**
@@ -29,20 +31,22 @@ public class HashCash {
     private String resource;
     private String challenge;
     private long timeStamp;
-    private String randomString;
+//    private String randomString;
+    private boolean isSolvedByOtherMiner = false;
+    private boolean isSolved = false;
 
     /**
      * @param difficulty [int] difficulty of the puzzle, each increase doubles the difficulty i.e 2^n
      * @param version [int] version of HashCash
      * @param resource [string] unique identifier, for Bitcoin it should be publicKey
      */
-    public HashCash(int version, int difficulty, String resource){
+    public HashCash(int version, int difficulty, String resource, long timeStamp){
 
         this.setDifficulty(difficulty);
         this.setVersion(version);
         this.setResource(resource);
-        this.setTimeStamp(System.currentTimeMillis());
-        this.setRandomString(this.generateString(12));
+        this.setTimeStamp(timeStamp);
+//        this.setRandomString(this.generateString(12));
 
         //now build our string
         StringBuilder stringBuilder = new StringBuilder();
@@ -50,12 +54,12 @@ public class HashCash {
         stringBuilder.append(':');
         stringBuilder.append(this.getDifficulty());
         stringBuilder.append(':');
-        stringBuilder.append(this.getTimeStamp());
-        stringBuilder.append(':');
+//        stringBuilder.append(this.getTimeStamp());
+//        stringBuilder.append(':');
         stringBuilder.append(this.getResource());
         stringBuilder.append(':');
-        stringBuilder.append(this.getRandomString());
-        stringBuilder.append(':');
+//        stringBuilder.append(this.getRandomString());
+//        stringBuilder.append(':');
 
         setChallenge(stringBuilder.toString());
         System.out.println(getChallenge());
@@ -63,12 +67,12 @@ public class HashCash {
     }
 
     //overloaded constructors
-    public HashCash(String resource){
-        this(1,24, resource);
+    public HashCash(String resource, long timeStamp){
+        this(1,28, resource, timeStamp);
     }
 
-    public HashCash (int version, String resource){
-        this(version, 24, resource);
+    public HashCash (int version, String resource, long timeStamp){
+        this(version, 24, resource, timeStamp);
     }
 
     /**
@@ -107,7 +111,7 @@ public class HashCash {
         //get number of bytes we need to check
         int bytes = this.getDifficulty() / 8;
         System.out.println(bytes);
-        boolean isSolved = false;
+//        boolean isSolved = false;
 
         //since we are not guaranteed to get a perfect number of bytes
         //we need to check any remaining bits
@@ -117,7 +121,7 @@ public class HashCash {
         setNonce(1);
 
 
-        while(!isSolved){
+        while(!isSolved && !isSolvedByOtherMiner){
             //allocate 32 bytes to hold the output of a sha-256 hash
             ByteBuffer buffer = ByteBuffer.allocate(32);
 
@@ -135,11 +139,20 @@ public class HashCash {
             byte[] byteArray = Arrays.copyOf(buffer.array(), buffer.array().length);
 
             isSolved = isSolutionToChallenge(byteArray, this.getDifficulty());
-            if(isSolved){
+
+            //get the is solved by other miner value
+            setSolvedByOtherMiner(MinerNetwork.isSolved);
+
+            if(isSolved && !isSolvedByOtherMiner){
                 System.out.println("Puzzle solved!!");
                 System.out.println("Nonce value is: " + getNonce());
                 System.out.println("Encoded is: " + generateBase64EncodedString(Long.toString(getNonce())));
                 System.out.println("Combined Challenge with nonce is: " + combinedChallengeWithNonce);
+            } else  if (isSolvedByOtherMiner){
+                // if we are here, that means another miner beat us to solving the challenge
+                // so we should return, and mine the next challenge.
+
+                return;
             } else {
                 //we did not find a solution to the challenge
                 //increment our nonce
@@ -250,17 +263,16 @@ public class HashCash {
         return this.timeStamp;
     }
 
-    public String getRandomString() {
-        return randomString;
-    }
+//    public String getRandomString() {
+//        return randomString;
+//    }
 
     /**
      * Getter for private variable nonce
-     * @param randomString [String] random String to be concatenated to the challenge
      */
-    public void setRandomString(String randomString) {
-        this.randomString = randomString;
-    }
+//    public void setRandomString(String randomString) {
+//        this.randomString = randomString;
+//    }
 
     public int getDifficulty() {
         return difficulty;
@@ -314,7 +326,7 @@ public class HashCash {
 
     public static void main(String[] args){
 
-        HashCash hashCash = new HashCash(1,24,"Dylan Hoffman");
+        HashCash hashCash = new HashCash(1,"Test1",System.currentTimeMillis());
         System.out.println(hashCash.getChallenge());
         long start = System.nanoTime();
 
@@ -340,4 +352,19 @@ public class HashCash {
 
     }
 
+    public boolean isSolvedByOtherMiner() {
+        return isSolvedByOtherMiner;
+    }
+
+    public void setSolvedByOtherMiner(boolean solvedByOtherMiner) {
+        isSolvedByOtherMiner = solvedByOtherMiner;
+    }
+
+    public boolean isSolved() {
+        return isSolved;
+    }
+
+    public void setSolved(boolean solved) {
+        isSolved = solved;
+    }
 }

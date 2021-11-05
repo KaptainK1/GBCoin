@@ -169,29 +169,29 @@ public class Transaction implements HashHelper, Beautify {
     }
 
     // below code needs to be removed eventually, as its a placeholder for the merkle tree
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    private double amount;
-    private String title;
-
-    public Transaction(String title, double amount){
-        this.amount = amount;
-        this.title = title;
-    }
+//    public double getAmount() {
+//        return amount;
+//    }
+//
+//    public void setAmount(double amount) {
+//        this.amount = amount;
+//    }
+//
+//    public String getTitle() {
+//        return title;
+//    }
+//
+//    public void setTitle(String title) {
+//        this.title = title;
+//    }
+//
+//    private double amount;
+//    private String title;
+//
+//    public Transaction(String title, double amount){
+//        this.amount = amount;
+//        this.title = title;
+//    }
     // above code needs to be removed eventually, as its a placeholder for the merkle tree
 
     public byte[] getDataToSign(int inputIndex){

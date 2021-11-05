@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 
 public class SHAUtils {
@@ -36,43 +37,8 @@ public class SHAUtils {
 
     }
 
-    /*
-    public static byte[] concatenateHash(byte[] leftHash, byte[] rightHash, String algorithm){
-
-        //create three BigIntegers, 2 to store the hashes from the input and
-        //1 to store the combined has as an int
-        BigInteger leftHashInt = new BigInteger(leftHash);
-        BigInteger rightHashInt = new BigInteger(rightHash);
-
-//        System.out.println("result: " + leftHashInt+rightHashInt);
-
-        BigInteger finalHashInt = leftHashInt.add(rightHashInt);
-
-        return SHAUtils.digest(finalHashInt.toByteArray(), algorithm);
+    public static String encodeBytes(byte[] data){
+        return Base64.getEncoder().encodeToString(data);
     }
-
-     */
-
-    /*
-    public static void main(String[] args){
-
-        String alg = "SHA-256";
-
-        String text = "323";
-        String text1 = "465";
-
-        System.out.println("Input is: " + text + " length is " + text.length());
-
-        byte[] shaInBytes = SHAUtils.digest(text.getBytes(UTF_8), alg);
-        byte[] shaInBytes1 = SHAUtils.digest(text1.getBytes(UTF_8), alg);
-
-        System.out.println("hex value is " + bytesToHex(shaInBytes) + " length is " + shaInBytes.length);
-        System.out.println("hex value is " + bytesToHex(shaInBytes1) + " length is " + shaInBytes1.length);
-    }
-
-     */
-
-
-
 
 }

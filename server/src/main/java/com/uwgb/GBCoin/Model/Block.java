@@ -1,6 +1,8 @@
 package com.uwgb.GBCoin.Model;
 
 import com.uwgb.GBCoin.Interfaces.HashHelper;
+import com.uwgb.GBCoin.MerkleTree.MerkleNode;
+import com.uwgb.GBCoin.MerkleTree.MerkleTree;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -9,6 +11,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 public class Block implements HashHelper {
@@ -16,8 +20,10 @@ public class Block implements HashHelper {
     private byte[] hash;
     private byte[] previousHash;
     private byte[] merkleRoot;
-    private CoinbaseTransaction coinbaseTransaction;
-    private List<Transaction> transactions;
+//    private CoinbaseTransaction coinbaseTransaction;
+    private ArrayList<Transaction> transactions;
+
+    //these two variables need to be set ONCE the block is solved
     private long timeStamp;
     private long nonce;
 
@@ -32,8 +38,44 @@ public class Block implements HashHelper {
     }
     //
 
-    public Block(PublicKey publicKey) {
+    public Block(PublicKey publicKey, byte[] prevHash, long timeStamp, ArrayList<Transaction> transactions) {
+        previousHash = Arrays.copyOf(prevHash, prevHash.length);
+        initTransactions(publicKey, transactions);
+        try{
+            initMerkleRoot();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
 
+        this.timeStamp = timeStamp;
+
+    }
+
+    /**
+     * function to initialize the merkle tree with the transactions
+     */
+    private void initMerkleRoot() throws IOException {
+        //ensure that transactions are not 0
+        assert transactions.size() <= 0;
+
+        //get the transactions to be put into the block
+        ArrayList<Transaction> txs = this.getTransactions();
+
+        //build the merkle tree with our transactions
+        MerkleTree tree = new MerkleTree(transactions);
+        tree.buildMerkleTree();
+
+        //get the merkle root which is a merkle node
+        MerkleNode root = tree.getMerkleRoot();
+        setMerkleRoot(root.getData());
+    }
+
+    private void initTransactions(PublicKey publicKey, ArrayList<Transaction> txs){
+
+        ArrayList<Transaction> transactions = new ArrayList<>(txs);
+        CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(publicKey);
+        transactions.add(coinbaseTransaction);
+        this.setTransactions(transactions);
     }
 
     @Override
@@ -75,14 +117,14 @@ public class Block implements HashHelper {
 
         byteBuffer.clear();
         byteBuffer = ByteBuffer.allocate(Long.SIZE / 8);
-        byteBuffer.putLong(nonce);
-        byte[] nonceData = byteBuffer.array();
+//        byteBuffer.putLong(nonce);
+//        byte[] nonceData = byteBuffer.array();
+//
+//        for (Byte b: nonceData){
+//            bytes.add(b);
+//        }
+//        byteBuffer.clear();
 
-        for (Byte b: nonceData){
-            bytes.add(b);
-        }
-
-        byteBuffer.clear();
         byteBuffer.putLong(timeStamp);
         byte[] timestampData = byteBuffer.array();
 
@@ -100,4 +142,67 @@ public class Block implements HashHelper {
 
     }
 
+    public static int getBlockHeight() {
+        return blockHeight;
+    }
+
+    public static void setBlockHeight(int blockHeight) {
+        Block.blockHeight = blockHeight;
+    }
+
+    public byte[] getHash() {
+        return hash;
+    }
+
+    public void setHash(byte[] hash) {
+        this.hash = hash;
+    }
+
+    public byte[] getPreviousHash() {
+        return previousHash;
+    }
+
+    public void setPreviousHash(byte[] previousHash) {
+        this.previousHash = previousHash;
+    }
+
+    public byte[] getMerkleRoot() {
+        return merkleRoot;
+    }
+
+    public void setMerkleRoot(byte[] merkleRoot) {
+        this.merkleRoot = merkleRoot;
+    }
+
+//    public CoinbaseTransaction getCoinbaseTransaction() {
+//        return coinbaseTransaction;
+//    }
+//
+//    public void setCoinbaseTransaction(CoinbaseTransaction coinbaseTransaction) {
+//        this.coinbaseTransaction = coinbaseTransaction;
+//    }
+
+    public ArrayList<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(ArrayList<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+    public long getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(long nonce) {
+        this.nonce = nonce;
+    }
 }

@@ -4,5 +4,5 @@ public interface IMinerObservable {
 
     void addObserver(IMinerObserver observer);
     void removeObserver(IMinerObserver observer);
-    void notifyObserver();
+    void notifyObserver(String challenge, String nonce);
 }

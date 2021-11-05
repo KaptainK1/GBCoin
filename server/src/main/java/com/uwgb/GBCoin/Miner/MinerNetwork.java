@@ -11,6 +11,10 @@ public class MinerNetwork implements IMinerObservable {
     private HashSet<IMinerObserver> minerNetwork;
     private Block nextBlock = null;
 
+    //FYI this is a code smell, this variable should not have global scope
+    //since any class can change it
+    public static boolean isSolved = false;
+
     public MinerNetwork() {
         minerNetwork = new HashSet<>();
     }
@@ -26,10 +30,10 @@ public class MinerNetwork implements IMinerObservable {
     }
 
     @Override
-    public void notifyObserver() {
+    public void notifyObserver(String challenge, String nonce) {
         assert (nextBlock != null);
         for (IMinerObserver observer: minerNetwork) {
-            observer.updateMiner();
+            observer.updateMiner(challenge, nonce);
         }
         setNextBlock(null);
     }
@@ -47,4 +51,11 @@ public class MinerNetwork implements IMinerObservable {
 
     }
 
+    public boolean isSolved() {
+        return isSolved;
+    }
+
+    public void setSolved(boolean solved) {
+        isSolved = solved;
+    }
 }
