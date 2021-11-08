@@ -1,9 +1,12 @@
 package com.uwgb.GBCoin.Model;
 
 import java.security.PublicKey;
+import java.util.Arrays;
 
 
 public class CoinbaseTransaction extends Transaction{
+
+    private static final byte[] nullAddress = new byte[32];
 
     /**
      * Simple coinbase transaction for which is created/paid when a miner
@@ -13,8 +16,9 @@ public class CoinbaseTransaction extends Transaction{
      */
     public CoinbaseTransaction(PublicKey publicKey){
         super();
+        Arrays.fill(nullAddress, (byte) 0);
         double blockReward = calculateBlockReward();
-        this.addInput(null, 0);
+        this.addInput(nullAddress, 0);
         this.addOutput(blockReward, publicKey);
     }
 

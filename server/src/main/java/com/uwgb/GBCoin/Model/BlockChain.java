@@ -16,12 +16,14 @@ public class BlockChain implements Serializable {
 
     public BlockChain(UTXOPool utxoPool){
         blockChain = new ArrayList<>();
-        if (utxoPool == null){
-            this.utxoPool = new UTXOPool();
-        } else {
-            this.utxoPool = utxoPool;
-        }
+        this.utxoPool = utxoPool;
+    }
 
+    //initialize a blockchain class provided a block chain
+    //we want to copy their blocks to our new chain
+    public BlockChain(BlockChain chain){
+        this.blockChain = new ArrayList<>(chain.blockChain);
+        this.utxoPool = chain.utxoPool;
     }
 
     public void addBlock(Block block){

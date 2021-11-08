@@ -35,6 +35,7 @@ public class MinerNetwork implements IMinerObservable {
         for (IMinerObserver observer: minerNetwork) {
             observer.updateMiner(challenge, nonce);
         }
+        MinerNetwork.isSolved = false;
         setNextBlock(null);
     }
 

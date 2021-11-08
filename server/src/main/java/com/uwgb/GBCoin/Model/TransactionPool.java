@@ -1,5 +1,7 @@
 package com.uwgb.GBCoin.Model;
 
+import com.uwgb.GBCoin.Utils.SHAUtils;
+
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,24 +15,24 @@ public class TransactionPool {
     UTXOPool utxoPool;
 
     public TransactionPool(ArrayList<Transaction> transactions, UTXOPool pool){
+        transactionList = new ArrayList<>(transactions);
+        utxoPool = pool;
+        transactionHandler= new TransactionHandler(pool);
+    }
+
+    public TransactionPool(UTXOPool pool){
         transactionList = new ArrayList<>();
         utxoPool = pool;
-
-        if (transactions != null && pool != null){
-            transactionList.addAll(transactions);
-            utxoPool = new UTXOPool(pool);
-            transactionHandler= new TransactionHandler(pool);
-        }
-
+        transactionHandler= new TransactionHandler(pool);
     }
 
     public void addTransaction(Transaction t){
         transactionList.add(t);
 
         //for each transaction output, add a new utxo as these are now available to be spent
-        for (int i = 0; i < t.getInputs().size(); i++) {
-            System.out.println(t.getInputs().get(i));
-            addUTXO(t.getInputs().get(i));
+        for (int i = 0; i < t.getOutputs().size(); i++) {
+//            System.out.println(SHAUtils.bytesToHex(t.getHash()));
+            addUTXO(t.getHash(), i, t.getOutputs().get(i));
         }
 
     }
@@ -69,11 +71,15 @@ public class TransactionPool {
 
     /**
      * function to add a new utxo given a Transaction input
-     * @param input the input for which we are now spending
+     *   the input for which we are now spending
      */
-    public void addUTXO(Transaction.Input input){
-        UTXO utxo = new UTXO(input);
-        Transaction.Output output = utxoPool.getTxOutput(utxo);
+//    public void addUTXO(Transaction.Input input){
+//        UTXO utxo = new UTXO(input);
+//        utxoPool.addUTXO(utxo, );
+//    }
+
+    public void addUTXO(byte[] hash, int index, Transaction.Output output){
+        UTXO utxo = new UTXO(hash, index);
         utxoPool.addUTXO(utxo, output);
     }
 

@@ -21,31 +21,27 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     private MinerNetwork minerNetwork;
     private TransactionNetwork transactionNetwork;
     private BlockChain blockChain;
-    private HashCash hashCash;
-    private TransactionHandler transactionHandler;
+    private TransactionPool transactionPool;
     private UTXOPool utxoPool;
     private List<Transaction> newTransactions;
     private List<Transaction> currentTransactions;
-    private TransactionPool transactionPool;
     private boolean keepMining = true;
 
-    public Miner(MinerNetwork minerNetwork, TransactionNetwork transactionNetwork, PublicKey publicKey, BlockChain blockChain) {
+    public Miner(MinerNetwork minerNetwork, TransactionNetwork transactionNetwork, PublicKey publicKey, BlockChain blockChain, UTXOPool utxoPool) {
 //        this.adjacentMiners = adjacentMiners;
         this.publicKey = publicKey;
         this.minerNetwork = minerNetwork;
         this.transactionNetwork = transactionNetwork;
-        this.blockChain = blockChain;
+        this.blockChain = new BlockChain(blockChain);
+        this.utxoPool = utxoPool;
         init();
     }
 
     private void init(){
-        //TODO figure out where we want to get the current utxo pool from
-        // we could use our database if we want too, which is what bitcoin uses
-        UTXOPool utxoPool = new UTXOPool();
-
+//        UTXOPool utxoPool = new UTXOPool();
         this.currentTransactions = new ArrayList<>();
-        this.transactionHandler = new TransactionHandler(utxoPool);
         this.newTransactions = new ArrayList<>();
+        this.transactionPool = new TransactionPool(this.utxoPool);
     }
 
 //    public void setAdjacentMiners(HashSet<Miner> adjacentMiners) {
@@ -103,7 +99,7 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     @Override
     public boolean validateTransactions(ArrayList<Transaction> transactions) {
         for (Transaction tx: transactions){
-            if (!transactionHandler.isValidTX(tx)){
+            if (!transactionPool.getTransactionHandler().isValidTX(tx)){
                 return false;
             }
         }
@@ -181,17 +177,33 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         this.currentTransactions = currentTransactions;
     }
 
+    public TransactionPool getTransactionPool() {
+        return transactionPool;
+    }
+
+    public void setTransactionPool(TransactionPool transactionPool) {
+        this.transactionPool = transactionPool;
+    }
+
     public static void main(String[] args) throws Exception {
         Wallet walletA = new Wallet();
         Wallet walletB = new Wallet();
-
-        Block block = new Block("test1");
+        UTXOPool pool = new UTXOPool();
+        BlockChain blockChain = new BlockChain(pool);
 
         MinerNetwork network = new MinerNetwork();
         TransactionNetwork transactionNetwork = new TransactionNetwork();
 
-        Miner miner1 = new Miner(network, transactionNetwork, walletA.getPublicKey(), null);
-        Miner miner2 = new Miner(network, transactionNetwork, walletB.getPublicKey(), null);
+        Miner miner1 = new Miner(network, transactionNetwork, walletA.getPublicKey(), blockChain, pool);
+        Miner miner2 = new Miner(network, transactionNetwork, walletB.getPublicKey(), blockChain, pool);
+
+        CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(walletA.getPublicKey());
+        coinbaseTransaction.hashObject();
+        miner1.getTransactionPool().addTransaction(coinbaseTransaction);
+
+        GenesisBlock block = new GenesisBlock(walletA.getPublicKey(), System.currentTimeMillis());
+        blockChain.addBlock(block);
+
 
         network.addObserver(miner1);
         network.addObserver(miner2);

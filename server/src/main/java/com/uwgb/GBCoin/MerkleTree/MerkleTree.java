@@ -27,6 +27,11 @@ public class MerkleTree {
 
         //calculate the number of levels needed for our tree1
         this.levels = (int) Math.ceil((Math.log10(size) / Math.log10(2)));
+
+        if (this.levels == 0 ){
+            this.levels = 1;
+        }
+
         System.out.println("Levels: " + this.levels);
 
         //create all the leaf nodes
@@ -57,7 +62,16 @@ public class MerkleTree {
             leafs.add(new MerkleNode(leafs.get(i+size -1).getData() ,null,null));
         }
 
-        buildMerkleTree();
+        if (this.size == 1){
+            this.merkleRoot = new MerkleNode(unspentTransactions.get(0).getHash(), null, null);
+        } else if (this.size < 3){
+            byte[] combinedHash = getDataForHashing(unspentTransactions.get(0).getHash(), unspentTransactions.get(1).getHash());
+            MerkleNode leftNode = new MerkleNode(unspentTransactions.get(0).getHash(), null, null);
+            MerkleNode rightNode = new MerkleNode(unspentTransactions.get(1).getHash(), null, null);
+            this.merkleRoot = new MerkleNode(combinedHash, leftNode, rightNode);
+        } else {
+            buildMerkleTree();
+        }
 
     }
 

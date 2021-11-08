@@ -39,6 +39,10 @@ public class Block implements HashHelper {
     //
 
     public Block(PublicKey publicKey, byte[] prevHash, long timeStamp, ArrayList<Transaction> transactions) {
+        if (prevHash == null){
+            prevHash = new byte[32];
+            Arrays.fill(prevHash, (byte) 0);
+        }
         previousHash = Arrays.copyOf(prevHash, prevHash.length);
         initTransactions(publicKey, transactions);
         try{
