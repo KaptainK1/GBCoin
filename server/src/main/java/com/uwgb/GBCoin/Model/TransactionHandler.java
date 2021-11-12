@@ -1,7 +1,6 @@
 package com.uwgb.GBCoin.Model;
 
 import com.uwgb.GBCoin.Utils.Crypto;
-import net.bytebuddy.implementation.bytecode.Throw;
 
 import java.security.PublicKey;
 import java.util.HashSet;
@@ -14,7 +13,7 @@ public class TransactionHandler {
     private double transactionFees;
 
     public TransactionHandler(UTXOPool utxoPool){
-        this.utxoPool = new UTXOPool(utxoPool);
+        this.utxoPool = utxoPool;
         this.transactionFees = -1;
     }
 
@@ -40,12 +39,8 @@ public class TransactionHandler {
 
         //loop through all inputs apart of the transaction
         for (Transaction.Input input: inputs) {
-            //check 1: to see if the transaction is a double spend
-            if (!isCoinDoubleSpent(claimedUTXO, input)){
-                return false;
-            }
 
-            //check 2: see if the transaction input is available to be spent
+            //check 1: see if the transaction input is available to be spent
             if (!isConsumedCoinAvailable(input)){
                 return false;
             }
@@ -55,7 +50,17 @@ public class TransactionHandler {
                 return false;
             }
 
-            UTXO utxo = new UTXO(input);
+            //check 3: to see if the transaction is a double spend
+            if (isCoinDoubleSpent(claimedUTXO, input)){
+                return false;
+            }
+
+            //check 4: verify incorrect null address usage
+//            if (doesConsumedCoinHaveNullAddress(transaction)) {
+//                return false;
+//            }
+
+            UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
             Transaction.Output correspondingOutput = utxoPool.getTxOutput(utxo);
             inputSum += correspondingOutput.getValue();
 
@@ -118,7 +123,7 @@ public class TransactionHandler {
 
             for (Transaction.Input input: inputs){
                 //create a new utxo with the input values
-                UTXO utxo = new UTXO(input);
+                UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
 
                 //get the corresponding transaction output from the utxo pool
                 Transaction.Output correspondingOutput = utxoPool.getTxOutput(utxo);
@@ -148,7 +153,7 @@ public class TransactionHandler {
     private boolean isCoinDoubleSpent(Set<UTXO> claimedUTXO, Transaction.Input input){
 
         //create the utxo with the input that was provided
-        UTXO utxo = new UTXO(input);
+        UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
 
         //if the utxo is already in the set of all claimed utxo's, then this is a double spend
         return !claimedUTXO.add(utxo);
@@ -163,7 +168,8 @@ public class TransactionHandler {
      * @return true if the signatures match up
      */
     private boolean isSignatureVerified(Transaction transaction, int index, Transaction.Input input){
-        UTXO utxo = new UTXO(input);
+        UTXOPool utxoPool = new UTXOPool(this.utxoPool);
+        UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
         Transaction.Output correspondingOutput = utxoPool.getTxOutput(utxo);
         PublicKey publicKey = correspondingOutput.getPublicKey();
         return Crypto.verifySignature(publicKey, transaction.getDataToSign(index), input.getSignature());
@@ -177,8 +183,27 @@ public class TransactionHandler {
      * false if it doesn't exist
      */
     private boolean isConsumedCoinAvailable(Transaction.Input input){
-        UTXO utxo = new UTXO(input);
+        UTXOPool utxoPool = new UTXOPool(this.utxoPool);
+        UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
         return utxoPool.contains(utxo);
+    }
+
+    private boolean doesConsumedCoinHaveNullAddress(Transaction transaction){
+
+        byte[] nullAddress = new byte[32];
+
+        for (Transaction.Input input: transaction.getInputs()){
+
+            if (input.getPrevTxHash() == nullAddress){
+                if (transaction instanceof CoinbaseTransaction){
+                    continue;
+                } else {
+                    System.out.println("Transaction contains null address but is not a coinbase transaction");
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public double getTransactionFees() {

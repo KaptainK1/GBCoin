@@ -11,33 +11,33 @@ public class BlockChain implements Serializable {
     //otherwise eventually we will run out of memory
 
     public final int MAX_HEIGHT = 30;
-    private UTXOPool utxoPool;
+//    private UTXOPool utxoPool;
     private List<Block> blockChain;
 
-    public BlockChain(UTXOPool utxoPool){
+    public BlockChain(){
         blockChain = new ArrayList<>();
-        this.utxoPool = utxoPool;
+//        this.utxoPool = utxoPool;
     }
 
     //initialize a blockchain class provided a block chain
     //we want to copy their blocks to our new chain
     public BlockChain(BlockChain chain){
         this.blockChain = new ArrayList<>(chain.blockChain);
-        this.utxoPool = chain.utxoPool;
+//        this.utxoPool = chain.utxoPool;
     }
 
     public void addBlock(Block block){
         blockChain.add(block);
     }
 
-    public void addUTXO(UTXO utxo, Transaction.Input input){
-        Transaction.Output correspondingOutput = utxoPool.getTxOutput(utxo);
-        this.utxoPool.addUTXO(utxo, correspondingOutput);
-    }
-
-    public void removeUTXO(UTXO utxo){
-        this.utxoPool.removeUTXO(utxo);
-    }
+//    public void addUTXO(UTXO utxo, Transaction.Input input){
+//        Transaction.Output correspondingOutput = utxoPool.getTxOutput(utxo);
+//        this.utxoPool.addUTXO(utxo, correspondingOutput);
+//    }
+//
+//    public void removeUTXO(UTXO utxo){
+//        this.utxoPool.removeUTXO(utxo);
+//    }
 
     public byte[] getCurrentHash(){
         Block block = this.blockChain.get(this.blockChain.size() -1);
@@ -47,8 +47,5 @@ public class BlockChain implements Serializable {
     public int getBlockHeight(){
         return this.blockChain.size();
     }
-
-
-
 
 }

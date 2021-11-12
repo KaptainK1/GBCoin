@@ -3,6 +3,7 @@ package com.uwgb.GBCoin.Miner;
 import com.uwgb.GBCoin.Interfaces.IMinerObservable;
 import com.uwgb.GBCoin.Interfaces.IMinerObserver;
 import com.uwgb.GBCoin.Model.Block;
+import com.uwgb.GBCoin.Model.GenesisBlock;
 
 import java.util.HashSet;
 

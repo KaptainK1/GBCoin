@@ -51,7 +51,7 @@ public class UTXO implements Comparable<UTXO>{
 
     public UTXO(Transaction.Input input){
         assert (input != null);
-        this.txhash = input.getPrevOutputHash();
+        this.txhash = input.getPrevTxHash();
         this.index = input.getOutputIndex();
     }
 

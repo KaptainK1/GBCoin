@@ -1,5 +1,8 @@
 package com.uwgb.GBCoin.Model;
 
+import com.uwgb.GBCoin.Utils.SHAUtils;
+
+import java.io.IOException;
 import java.security.PublicKey;
 import java.util.Arrays;
 
@@ -14,12 +17,18 @@ public class CoinbaseTransaction extends Transaction{
      * the output is set to a static 10.0 coins
      * @param publicKey the recipient who should get the coins. i.e. the miners address
      */
-    public CoinbaseTransaction(PublicKey publicKey){
+    public CoinbaseTransaction(PublicKey publicKey) {
         super();
         Arrays.fill(nullAddress, (byte) 0);
         double blockReward = calculateBlockReward();
         this.addInput(nullAddress, 0);
         this.addOutput(blockReward, publicKey);
+        try {
+            super.hashObject();
+            System.out.println(super.getHash());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -29,7 +38,7 @@ public class CoinbaseTransaction extends Transaction{
      * @return the block reward as a double
      */
     private static double calculateBlockReward(){
-        int rewardTier = ((Block.blockHeight / 1000) + 1);
+        int rewardTier = ((Block.getBlockHeight() / 1000) + 1);
         double blockReward = 100.0d;
         for (int i = 1; i < rewardTier; i++) {
             blockReward /= 2;
@@ -52,4 +61,9 @@ public class CoinbaseTransaction extends Transaction{
         System.out.println("Block reward is : " + blockReward + " gbcoins");
     }
     */
+
+    @Override
+    public String toString(){
+        return ("Transaction Reward: "+ String.valueOf(calculateBlockReward()) + " " + SHAUtils.encodeBytes(super.getOutputs().get(0).getPublicKey().getEncoded()));
+    }
 }

@@ -44,4 +44,9 @@ public class TransactionNetwork implements ITransactionObservable {
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
     }
+
+    public void receiveTransaction(Transaction transaction){
+        setTransaction(transaction);
+        notifyObserver();
+    }
 }

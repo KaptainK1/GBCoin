@@ -71,6 +71,10 @@ public class HashCash {
         this(1,28, resource, timeStamp);
     }
 
+    public HashCash(String resource){
+        this(1,28, resource, System.currentTimeMillis());
+    }
+
     public HashCash (int version, String resource, long timeStamp){
         this(version, 24, resource, timeStamp);
     }

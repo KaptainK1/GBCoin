@@ -5,11 +5,9 @@ import com.uwgb.GBCoin.Interfaces.HashHelper;
 import com.uwgb.GBCoin.Utils.Crypto;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,18 +65,18 @@ public class Transaction implements HashHelper, Beautify {
 
         public class Input implements Beautify{
 
-            private byte[] prevOutputHash;
+            private byte[] prevTxHash;
             private int outputIndex;
             private byte[] signature;
 
-            public Input(byte[] prevOutputHash, int outputIndex, byte[] signature){
+            public Input(byte[] prevTxHash, int outputIndex, byte[] signature){
                 this.setSignature(signature);
                 this.setOutputIndex(outputIndex);
-                this.setPrevOutputHash(prevOutputHash);
+                this.setPrevTxHash(prevTxHash);
             }
 
-            public Input(byte[] prevOutputHash, int outputIndex){
-                this(prevOutputHash, outputIndex, null);
+            public Input(byte[] prevTxHash, int outputIndex){
+                this(prevTxHash, outputIndex, null);
             }
 
             public void addSignature(byte[] signature){
@@ -93,12 +91,12 @@ public class Transaction implements HashHelper, Beautify {
              *
              * @return
              */
-            public byte[] getPrevOutputHash() {
-                return prevOutputHash;
+            public byte[] getPrevTxHash() {
+                return prevTxHash;
             }
 
-            public void setPrevOutputHash(byte[] prevOutputHash) {
-                this.prevOutputHash = prevOutputHash.clone();
+            public void setPrevTxHash(byte[] prevTxHash) {
+                this.prevTxHash = prevTxHash.clone();
             }
 
             public int getOutputIndex() {
@@ -207,7 +205,7 @@ public class Transaction implements HashHelper, Beautify {
         Input input = this.getInputs().get(inputIndex);
 
         //get the hash of the input data
-        byte[] hash = input.getPrevOutputHash();
+        byte[] hash = input.getPrevTxHash();
 
         //create  a new byte buffer and add our index
         ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.SIZE / 8);
@@ -274,7 +272,7 @@ public class Transaction implements HashHelper, Beautify {
         for (Input input : this.getInputs()){
             inputBuffer.putInt(input.getOutputIndex());
             byte[] outputIndex = inputBuffer.array();
-            byte[] hash = input.getPrevOutputHash();
+            byte[] hash = input.getPrevTxHash();
 
             for (Byte b: outputIndex) {
                 transactionData.add(b);

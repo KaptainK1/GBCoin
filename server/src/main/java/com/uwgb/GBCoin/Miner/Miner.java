@@ -21,8 +21,8 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     private MinerNetwork minerNetwork;
     private TransactionNetwork transactionNetwork;
     private BlockChain blockChain;
+
     private TransactionPool transactionPool;
-    private UTXOPool utxoPool;
     private List<Transaction> newTransactions;
     private List<Transaction> currentTransactions;
     private boolean keepMining = true;
@@ -33,15 +33,9 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         this.minerNetwork = minerNetwork;
         this.transactionNetwork = transactionNetwork;
         this.blockChain = new BlockChain(blockChain);
-        this.utxoPool = utxoPool;
-        init();
-    }
-
-    private void init(){
-//        UTXOPool utxoPool = new UTXOPool();
+        this.transactionPool = new TransactionPool(utxoPool);
         this.currentTransactions = new ArrayList<>();
         this.newTransactions = new ArrayList<>();
-        this.transactionPool = new TransactionPool(this.utxoPool);
     }
 
 //    public void setAdjacentMiners(HashSet<Miner> adjacentMiners) {
@@ -66,32 +60,49 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         //get the proposed block
         Block block = minerNetwork.getNextBlock();
 
-        //do a check to see if this block is already extended onto the block-chain
-        if (Block.blockHeight == blockChain.getBlockHeight()){
-            return;
-
-            //check to see if the hash of the block is truly solved then
-        } else if (HashCash.isValidSolution(challenge, nonce, 28)){
-            return;
-            //begin validation
-        } else if (!validateTransactions(block.getTransactions())){
-            return;
+        if (challenge == null && nonce == null){
+            if (!(block instanceof GenesisBlock)){
+                return;
+            } else {
+                    //if all looks well, extend our version of the block-chain
+                blockChain.addBlock(block);
+                System.out.println("Block added successfully!");
+                //Block block = this.minerNetwork.getNextBlock();
+                System.out.println("Block height is: " + Block.getBlockHeight());
+            }
         } else {
-            //if all looks well, extend our version of the block-chain
-            blockChain.addBlock(block);
+
+            //do a check to see if this block is already extended onto the block-chain
+            if (Block.getBlockHeight() == blockChain.getBlockHeight()){
+                return;
+
+                //check to see if the hash of the block is truly solved then
+            } else if (HashCash.isValidSolution(challenge, nonce, 28)){
+                return;
+                //begin validation
+            } else if (!validateTransactions(block.getTransactions())){
+                return;
+            } else {
+                //if all looks well, extend our version of the block-chain
+                blockChain.addBlock(block);
+            }
+
+            System.out.println("Block added successfully!");
+            //Block block = this.minerNetwork.getNextBlock();
+            System.out.println("Block height is: " + Block.getBlockHeight());
+
         }
 
-        System.out.println("Block added successfully!");
-        //Block block = this.minerNetwork.getNextBlock();
-        System.out.println("Block height is: " + Block.blockHeight);
     }
     // end IMinerObserver interface functions
 
     //ITransactionObserver interface functions
     @Override
     public void updateTransaction() {
-        //TODO need to handle when we hear about a new transaction
-        System.out.println("Transaction1 has been added");
+        Transaction t = this.transactionNetwork.getTransaction();
+        this.newTransactions.add(t);
+        System.out.println(t);
+        System.out.println("Transaction has been added");
     }
     // end ITransactionObserver interface functions
 
@@ -106,25 +117,25 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         return true;
     }
 
-    @Override
-    public void receiveTransaction(byte[] privateKey, byte[] publicKey, double amount) {
-        
-    }
+//    @Override
+//    public void receiveTransaction(byte[] privateKey, byte[] publicKey, double amount) {
+//
+//    }
 
     @Override
     public void mineNewBlock() {
         //TODO need to implement this code
         //initialize the transactions to add to the block to the list of the new transactions
-        ArrayList<Transaction> transactionsToAdd = new ArrayList<>(newTransactions);
+        this.currentTransactions = new ArrayList<>(newTransactions);
 
         //clear out the new transactions list now
         this.newTransactions.clear();
 
         //get the current timestamp
         long timeStamp = System.currentTimeMillis();
-        long nonce = 0;
+        //long nonce = 0;
         //create the block
-        Block block = new Block(this.getPublicKey(), blockChain.getCurrentHash(), timeStamp, transactionsToAdd);
+        Block block = new Block(this.getPublicKey(), blockChain.getCurrentHash(), timeStamp, currentTransactions);
 
         try{
             block.hashObject();
@@ -132,6 +143,7 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
             e.printStackTrace();
         }
 
+        //Create the puzzle and start mining until it is solved
         HashCash puzzle = new HashCash(SHAUtils.encodeBytes(block.getHash()), timeStamp);
         while(!puzzle.isSolved()){
             puzzle.mine();
@@ -186,10 +198,18 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     }
 
     public static void main(String[] args) throws Exception {
+
+        positiveTest();
+        //network.notifyObserver();
+    }
+
+    public static void positiveTest() throws Exception {
+
         Wallet walletA = new Wallet();
         Wallet walletB = new Wallet();
+
         UTXOPool pool = new UTXOPool();
-        BlockChain blockChain = new BlockChain(pool);
+        BlockChain blockChain = new BlockChain();
 
         MinerNetwork network = new MinerNetwork();
         TransactionNetwork transactionNetwork = new TransactionNetwork();
@@ -198,12 +218,10 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         Miner miner2 = new Miner(network, transactionNetwork, walletB.getPublicKey(), blockChain, pool);
 
         CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(walletA.getPublicKey());
-        coinbaseTransaction.hashObject();
         miner1.getTransactionPool().addTransaction(coinbaseTransaction);
 
         GenesisBlock block = new GenesisBlock(walletA.getPublicKey(), System.currentTimeMillis());
         blockChain.addBlock(block);
-
 
         network.addObserver(miner1);
         network.addObserver(miner2);
@@ -212,7 +230,7 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         transactionNetwork.addObserver(miner2);
 
         network.setNextBlock(block);
-        //network.notifyObserver();
+        network.notifyObserver(null,null);
     }
 
 

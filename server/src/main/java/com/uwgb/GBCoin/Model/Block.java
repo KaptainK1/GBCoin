@@ -16,7 +16,7 @@ import java.util.Base64;
 import java.util.List;
 
 public class Block implements HashHelper {
-    public static int blockHeight = 0;
+    private static int blockHeight = 0;
     private byte[] hash;
     private byte[] previousHash;
     private byte[] merkleRoot;
@@ -38,7 +38,7 @@ public class Block implements HashHelper {
     }
     //
 
-    public Block(PublicKey publicKey, byte[] prevHash, long timeStamp, ArrayList<Transaction> transactions) {
+    public Block(PublicKey publicKey, byte[] prevHash, long timeStamp, List<Transaction> transactions) {
         if (prevHash == null){
             prevHash = new byte[32];
             Arrays.fill(prevHash, (byte) 0);
@@ -67,14 +67,14 @@ public class Block implements HashHelper {
 
         //build the merkle tree with our transactions
         MerkleTree tree = new MerkleTree(transactions);
-        tree.buildMerkleTree();
+        //tree.buildMerkleTree();
 
         //get the merkle root which is a merkle node
         MerkleNode root = tree.getMerkleRoot();
         setMerkleRoot(root.getData());
     }
 
-    private void initTransactions(PublicKey publicKey, ArrayList<Transaction> txs){
+    private void initTransactions(PublicKey publicKey, List<Transaction> txs){
 
         ArrayList<Transaction> transactions = new ArrayList<>(txs);
         CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(publicKey);
@@ -150,9 +150,9 @@ public class Block implements HashHelper {
         return blockHeight;
     }
 
-    public static void setBlockHeight(int blockHeight) {
-        Block.blockHeight = blockHeight;
-    }
+//    public static void setBlockHeight(int blockHeight) {
+//        Block.blockHeight = blockHeight;
+//    }
 
     public byte[] getHash() {
         return hash;
