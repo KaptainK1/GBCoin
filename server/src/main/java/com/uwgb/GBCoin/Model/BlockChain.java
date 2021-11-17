@@ -48,4 +48,10 @@ public class BlockChain implements Serializable {
         return this.blockChain.size();
     }
 
+    public static void printBlockChain(BlockChain chain){
+        for (int i = 0; i < chain.blockChain.size(); i++) {
+            chain.blockChain.get(i).printBlock();
+        }
+    }
+
 }

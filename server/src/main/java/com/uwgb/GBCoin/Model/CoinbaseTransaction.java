@@ -37,7 +37,7 @@ public class CoinbaseTransaction extends Transaction{
      * starting block reward is 100 gbcoins
      * @return the block reward as a double
      */
-    private static double calculateBlockReward(){
+    public static double calculateBlockReward(){
         int rewardTier = ((Block.getBlockHeight() / 1000) + 1);
         double blockReward = 100.0d;
         for (int i = 1; i < rewardTier; i++) {

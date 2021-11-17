@@ -63,8 +63,11 @@ public class UTXOPool {
      * @return returns an array list of all the current utxos that are available to spend
      */
     public ArrayList<UTXO> getUTXOs(){
-        Set<UTXO> utxoSet= this.utxoPool.keySet();
+        Set<UTXO> utxoSet = this.utxoPool.keySet();
         return new ArrayList<>(utxoSet);
     }
 
+    public HashMap<UTXO, Transaction.Output> getUtxoPool() {
+        return utxoPool;
+    }
 }

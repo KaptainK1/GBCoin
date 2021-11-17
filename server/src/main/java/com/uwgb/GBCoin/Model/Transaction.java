@@ -3,6 +3,7 @@ package com.uwgb.GBCoin.Model;
 import com.uwgb.GBCoin.Interfaces.Beautify;
 import com.uwgb.GBCoin.Interfaces.HashHelper;
 import com.uwgb.GBCoin.Utils.Crypto;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -17,7 +18,7 @@ public class Transaction implements HashHelper, Beautify {
         // The Inner Output class represents outgoing spend transactions
         // so, we need the Public Key of whom the payment should go to
         // and the amount in GBCoins
-        public class Output implements Beautify{
+        public class Output implements Beautify, Comparable<Transaction.Output>{
 
             private PublicKey publicKey;
             private double value;
@@ -60,6 +61,39 @@ public class Transaction implements HashHelper, Beautify {
 
             public void setValue(double value) {
                 this.value = value;
+            }
+
+            @Override
+            public int compareTo(@NotNull Transaction.Output o) {
+                    if (this.value < o.getValue()){
+                        return -1;
+                    } else if (this.value > o.getValue()){
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+            }
+
+            public boolean equals(Object other){
+                if (other == null){
+                    return false;
+                }
+
+                if (getClass() != other.getClass()){
+                    return false;
+                }
+
+                Transaction.Output output = (Transaction.Output)other;
+
+                if (this.value != output.value){
+                    return false;
+                }
+
+                if (this.getPublicKey() != output.getPublicKey()){
+                    return false;
+                }
+
+                return true;
             }
         }
 

@@ -60,41 +60,42 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         //get the proposed block
         Block block = minerNetwork.getNextBlock();
 
-        if (challenge == null && nonce == null){
-            if (!(block instanceof GenesisBlock)){
-                return;
-            } else {
-                    //if all looks well, extend our version of the block-chain
-                blockChain.addBlock(block);
-                System.out.println("Block added successfully!");
-                //Block block = this.minerNetwork.getNextBlock();
-                System.out.println("Block height is: " + Block.getBlockHeight());
-            }
-        } else {
-
-            //do a check to see if this block is already extended onto the block-chain
-            if (Block.getBlockHeight() == blockChain.getBlockHeight()){
-                return;
-
-                //check to see if the hash of the block is truly solved then
-            } else if (HashCash.isValidSolution(challenge, nonce, 28)){
-                return;
-                //begin validation
-            } else if (!validateTransactions(block.getTransactions())){
-                return;
-            } else {
-                //if all looks well, extend our version of the block-chain
-                blockChain.addBlock(block);
-            }
-
+        if (isBlockValid(block, challenge, nonce)){
+            blockChain.addBlock(block);
             System.out.println("Block added successfully!");
-            //Block block = this.minerNetwork.getNextBlock();
             System.out.println("Block height is: " + Block.getBlockHeight());
-
+        } else {
+            System.out.println("Error with adding block");
         }
 
     }
     // end IMinerObserver interface functions
+
+    public boolean isBlockValid(Block block, String challenge, String nonce) {
+        if (challenge == null && nonce == null) {
+            if (!(block instanceof GenesisBlock)) {
+                return false;
+                //check to see if the coinbase reward is not greater than the current block reward
+            } else if (block.getTransactions().get(0).getOutputs().get(0).getValue() > CoinbaseTransaction.calculateBlockReward()) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+
+            //do a check to see if this block is already extended onto the block-chain
+            if (Block.getBlockHeight() == blockChain.getBlockHeight()) {
+                if (HashCash.isValidSolution(challenge, nonce, 28)) {
+                    if (validateTransactions(block.getTransactions())) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+
+        }
+    }
 
     //ITransactionObserver interface functions
     @Override
@@ -153,6 +154,8 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
 
         //set the miner network observable's block to the one we just found
         //this is necessary so other blocks can get this data.
+
+        //TODO pass the block object as a parameter instead
         minerNetwork.setNextBlock(block);
 
         //update all other miners of the new block that was found
@@ -221,6 +224,7 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         miner1.getTransactionPool().addTransaction(coinbaseTransaction);
 
         GenesisBlock block = new GenesisBlock(walletA.getPublicKey(), System.currentTimeMillis());
+        block.hashObject();
         blockChain.addBlock(block);
 
         network.addObserver(miner1);
@@ -231,6 +235,9 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
 
         network.setNextBlock(block);
         network.notifyObserver(null,null);
+        BlockChain.printBlockChain(blockChain);
+        System.out.println("Miner A has: " + walletA.getTotalCoins(pool) + " GBCoins");
+        System.out.println("Miner B has: " + walletB.getTotalCoins(pool) + " GBCoins");
     }
 
 

@@ -3,6 +3,7 @@ package com.uwgb.GBCoin.Model;
 import com.uwgb.GBCoin.Interfaces.HashHelper;
 import com.uwgb.GBCoin.MerkleTree.MerkleNode;
 import com.uwgb.GBCoin.MerkleTree.MerkleTree;
+import com.uwgb.GBCoin.Utils.SHAUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -17,6 +18,7 @@ import java.util.List;
 
 public class Block implements HashHelper {
     private static int blockHeight = 0;
+    private int blockNumber;
     private byte[] hash;
     private byte[] previousHash;
     private byte[] merkleRoot;
@@ -39,6 +41,7 @@ public class Block implements HashHelper {
     //
 
     public Block(PublicKey publicKey, byte[] prevHash, long timeStamp, List<Transaction> transactions) {
+        this.blockNumber = blockHeight;
         if (prevHash == null){
             prevHash = new byte[32];
             Arrays.fill(prevHash, (byte) 0);
@@ -52,7 +55,7 @@ public class Block implements HashHelper {
         }
 
         this.timeStamp = timeStamp;
-
+        ++blockHeight;
     }
 
     /**
@@ -112,7 +115,7 @@ public class Block implements HashHelper {
 
         //add block height to byte array
         ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.SIZE / 8);
-        byteBuffer.putInt(blockHeight);
+        byteBuffer.putInt(blockNumber);
         byte[] height = byteBuffer.array();
 
         for (Byte b: height){
@@ -208,5 +211,16 @@ public class Block implements HashHelper {
 
     public void setNonce(long nonce) {
         this.nonce = nonce;
+    }
+
+    public void printBlock(){
+        System.out.print("|----------------|");
+        System.out.printf("\n| %s: %d |","Block Number", blockNumber);
+        System.out.printf("\n| %s: %d |","Timestamp", timeStamp);
+        System.out.printf("\n| %s: %d |","Nonce", nonce);
+        System.out.printf("\n| %s: %s |","Block Hash", SHAUtils.bytesToHex(hash));
+        System.out.printf("\n| %s %s |","Previous Hash", SHAUtils.bytesToHex(previousHash));
+        System.out.printf("\n| %s %s |","Merkle Root", SHAUtils.bytesToHex(merkleRoot));
+        System.out.print("\n|---------------|");
     }
 }
