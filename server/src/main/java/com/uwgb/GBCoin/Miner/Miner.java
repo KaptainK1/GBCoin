@@ -1,16 +1,19 @@
 package com.uwgb.GBCoin.Miner;
 
+import com.uwgb.GBCoin.API.Services.WalletService;
 import com.uwgb.GBCoin.Interfaces.IMiner;
 import com.uwgb.GBCoin.Interfaces.IMinerObserver;
 import com.uwgb.GBCoin.Interfaces.ITransactionObserver;
 import com.uwgb.GBCoin.Model.*;
 import com.uwgb.GBCoin.ProofOfWork.HashCash;
 import com.uwgb.GBCoin.Utils.SHAUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -223,6 +226,10 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(walletA.getPublicKey());
         miner1.getTransactionPool().addTransaction(coinbaseTransaction);
 
+        HashMap<PublicKey, Double> payments = new HashMap<>();
+        payments.put(walletB.getPublicKey(), 25.0d);
+        miner1.getTransactionPool().spendNewTransaction(25.0d, walletA, payments );
+
         GenesisBlock block = new GenesisBlock(walletA.getPublicKey(), System.currentTimeMillis());
         block.hashObject();
         blockChain.addBlock(block);
@@ -236,8 +243,8 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         network.setNextBlock(block);
         network.notifyObserver(null,null);
         BlockChain.printBlockChain(blockChain);
-        System.out.println("Miner A has: " + walletA.getTotalCoins(pool) + " GBCoins");
-        System.out.println("Miner B has: " + walletB.getTotalCoins(pool) + " GBCoins");
+        System.out.println("Miner A has: " + miner1.getTransactionPool().getTotalCoins(miner1.getPublicKey()) + " GBCoins");
+        System.out.println("Miner B has: " + miner1.getTransactionPool().getTotalCoins(miner2.getPublicKey()) + " GBCoins");
     }
 
 

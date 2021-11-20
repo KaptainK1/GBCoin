@@ -9,3 +9,7 @@ insert into wallets values (1, "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlF
 
 select sum(length(PrivateKey)) as total_size 
 from Wallet;
+
+\connect
+\use gbcoin_db
+\sql
