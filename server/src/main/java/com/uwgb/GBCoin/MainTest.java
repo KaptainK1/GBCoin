@@ -39,6 +39,8 @@ public class MainTest {
         block.hashObject();
         blockChain.addBlock(block);
 
+        miner1.getTransactionPool().clearTransactions();
+
         network.setNextBlock(block);
         network.notifyObserver(null,null);
         BlockChain.printBlockChain(blockChain);
@@ -49,13 +51,26 @@ public class MainTest {
 
         while (true) {
             //TODO update next transaction list
-            List<Transaction> newTransactions = generateTransactions(data, miner1.getTransactionPool());
+            List<Transaction> newTransactions = generateTransactions(walletA, walletB, 2, miner1.getTransactionPool());
             //start miners
 
 
         }
 
 
+    }
+
+    private static List<Transaction> generateTransactions(Wallet spender, Wallet receiver, int numberOfTransactions, TransactionPool transactionPool) throws TransactionException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException {
+
+        double maxSpendAmount = transactionPool.getTotalCoins(spender.getPublicKey());
+        double randomAmount = ThreadLocalRandom.current().nextDouble(0, maxSpendAmount / 2);
+
+        for (int i = 0; i < numberOfTransactions; i++) {
+            HashMap<PublicKey, Double> data = new HashMap<>();
+            data.put(receiver.getPublicKey(), randomAmount);
+            transactionPool.spendNewTransaction(randomAmount, spender, data);
+        }
+        return transactionPool.getTransactionList();
     }
 
     private static List<Transaction> generateTransactions(HashMap<Wallet, Integer> data, TransactionPool transactionPool) throws TransactionException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException {
