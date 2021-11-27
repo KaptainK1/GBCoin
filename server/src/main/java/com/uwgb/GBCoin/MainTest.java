@@ -1,16 +1,17 @@
 package com.uwgb.GBCoin;
 
+import com.uwgb.GBCoin.API.Exceptions.TransactionException;
 import com.uwgb.GBCoin.API.Services.WalletService;
 import com.uwgb.GBCoin.Miner.Miner;
 import com.uwgb.GBCoin.Miner.MinerNetwork;
 import com.uwgb.GBCoin.Model.*;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MainTest {
 
@@ -42,12 +43,52 @@ public class MainTest {
         network.notifyObserver(null,null);
         BlockChain.printBlockChain(blockChain);
 
+        HashMap<Wallet, Integer> data = new HashMap<>();
+        data.put(walletA, 2);
+        data.put(walletB, 2);
+
         while (true) {
             //TODO update next transaction list
+            List<Transaction> newTransactions = generateTransactions(data, miner1.getTransactionPool());
             //start miners
 
 
         }
+
+
+    }
+
+    private static List<Transaction> generateTransactions(HashMap<Wallet, Integer> data, TransactionPool transactionPool) throws TransactionException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException {
+        Iterator<Wallet> iterator = data.keySet().iterator();
+
+        Map.Entry<Wallet, Integer> entry = data.entrySet().iterator().next();
+        Wallet firstWallet = entry.getKey();
+
+        //fill in iterator has next here
+//        while()
+
+        for (Wallet wallet: data.keySet()) {
+            int numOfTransactions = data.get(wallet);
+
+            for (int i = 0; i < numOfTransactions; i++) {
+                double maxSpendAmount = transactionPool.getTotalCoins(wallet.getPublicKey());
+                double randomAmount = ThreadLocalRandom.current().nextDouble(0, maxSpendAmount / 2);
+
+                Wallet receiverWallet;
+                if (iterator.hasNext()){
+                    receiverWallet = iterator.next();
+                } else {
+                    receiverWallet = firstWallet;
+                }
+
+                HashMap<PublicKey, Double> receiverKeys = new HashMap<>();
+                receiverKeys.put(receiverWallet.getPublicKey(), randomAmount);
+
+                transactionPool.spendNewTransaction(randomAmount, wallet, receiverKeys);
+            }
+        }
+
+        return transactionPool.getTransactionList();
     }
 
 
