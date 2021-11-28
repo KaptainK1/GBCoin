@@ -115,9 +115,10 @@ public class TransactionPool {
 
         // loop through each picked utxo and add that as an input
         for (int i = 0; i < pickedUTXOs.length; i++) {
-            Transaction.Output output = utxoPool.getTxOutput(pickedUTXOs[0]);
+            System.out.println("UTXO's for this Transaction: " + pickedUTXOs.length);
+            Transaction.Output output = utxoPool.getTxOutput(pickedUTXOs[i]);
             utxoAmount += output.getValue();
-            transaction.addInput(pickedUTXOs[0].getTxhash(), pickedUTXOs[0].getIndex());
+            transaction.addInput(pickedUTXOs[i].getTxhash(), pickedUTXOs[i].getIndex());
         }
 
         //here we need to check to see if the total amount in unspent transaction outputs
@@ -154,12 +155,16 @@ public class TransactionPool {
         //add the transactions to the transaction list
         this.addTransaction(transaction);
 
+//        for (UTXO utxo: utxos) {
+////            this.removeUTXO(utxo.getTxhash(), utxo.getIndex());
+//            this.removeUTXO(utxo);
+//        }
+
         //remove used unspent transactions outputs
         //because in bitcoin, a coin is consumed fully
         //so the "change" needs to be a new transaction
-        for (UTXO utxo: utxos) {
-//            this.removeUTXO(utxo.getTxhash(), utxo.getIndex());
-            this.removeUTXO(utxo);
+        for (UTXO pickedUTXO : pickedUTXOs) {
+            this.removeUTXO(pickedUTXO);
         }
     }
 
@@ -204,11 +209,12 @@ public class TransactionPool {
             outputs.add(utxoPool.getTxOutput(utxo));
         }
 
-        Collections.sort(outputs);
+        //TODO improve sorting alg
+        Collections.sort(outputs, Collections.reverseOrder());
         int i = 0;
         while(currentAmount < amount){
-            selectedOutputs.add(outputs.get(0));
-            currentAmount+=outputs.get(0).getValue();
+            selectedOutputs.add(outputs.get(i));
+            currentAmount+=outputs.get(i).getValue();
             i++;
         }
 

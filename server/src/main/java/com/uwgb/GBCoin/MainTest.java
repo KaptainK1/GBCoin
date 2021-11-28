@@ -51,8 +51,14 @@ public class MainTest {
 
         while (true) {
             //TODO update next transaction list
-            List<Transaction> newTransactions = generateTransactions(walletA, walletB, 2, miner1.getTransactionPool());
+            generateTransactions(walletA, walletB, 2, miner1.getTransactionPool());
+            generateTransactions(walletB, walletA, 2, miner1.getTransactionPool());
             //start miners
+
+            //set the miner's new transaction list to the combined list of A and B
+            //miner1.setNewTransactions(newTransactionsA);
+
+            miner1.mineNewBlock();
 
 
         }
@@ -60,17 +66,17 @@ public class MainTest {
 
     }
 
-    private static List<Transaction> generateTransactions(Wallet spender, Wallet receiver, int numberOfTransactions, TransactionPool transactionPool) throws TransactionException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException {
-
-        double maxSpendAmount = transactionPool.getTotalCoins(spender.getPublicKey());
-        double randomAmount = ThreadLocalRandom.current().nextDouble(0, maxSpendAmount / 2);
+    private static void generateTransactions(Wallet spender, Wallet receiver, int numberOfTransactions, TransactionPool transactionPool) throws TransactionException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException {
 
         for (int i = 0; i < numberOfTransactions; i++) {
+            double maxSpendAmount = transactionPool.getTotalCoins(spender.getPublicKey());
+            double randomAmount = ThreadLocalRandom.current().nextDouble(0, maxSpendAmount / 2);
+
             HashMap<PublicKey, Double> data = new HashMap<>();
             data.put(receiver.getPublicKey(), randomAmount);
             transactionPool.spendNewTransaction(randomAmount, spender, data);
         }
-        return transactionPool.getTransactionList();
+//        return transactionPool.getTransactionList();
     }
 
     private static List<Transaction> generateTransactions(HashMap<Wallet, Integer> data, TransactionPool transactionPool) throws TransactionException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException {
