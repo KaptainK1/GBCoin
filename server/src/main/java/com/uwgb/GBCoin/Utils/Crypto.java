@@ -27,7 +27,8 @@ public class Crypto {
         return false;
     }
 
-    public static byte[] signMessage(PrivateKey privateKey, byte[] messageToSign) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public static byte[] signMessage(PrivateKey privateKey, byte[] messageToSign) throws NoSuchAlgorithmException,
+            InvalidKeyException, SignatureException {
 
         Signature signature = Signature.getInstance("SHA256withRSA");
         signature.initSign(privateKey);

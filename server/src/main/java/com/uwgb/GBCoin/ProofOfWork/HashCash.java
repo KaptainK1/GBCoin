@@ -68,15 +68,15 @@ public class HashCash {
 
     //overloaded constructors
     public HashCash(String resource, long timeStamp){
-        this(1,28, resource, timeStamp);
+        this(1,20, resource, timeStamp);
     }
 
     public HashCash(String resource){
-        this(1,28, resource, System.currentTimeMillis());
+        this(1,20, resource, System.currentTimeMillis());
     }
 
     public HashCash (int version, String resource, long timeStamp){
-        this(version, 24, resource, timeStamp);
+        this(version, 20, resource, timeStamp);
     }
 
     /**
@@ -344,7 +344,7 @@ public class HashCash {
 
         hashCash.mine();
 
-        if (HashCash.isValidSolution(hashCash.getChallenge(), Long.toString(hashCash.getNonce()), 24)) {
+        if (HashCash.isValidSolution(hashCash.getChallenge(), Long.toString(hashCash.getNonce()), 20)) {
             System.out.println("Puzzle has valid solution");
             System.out.println(hashCash.getNonce() + " is a valid solution");
         } else {

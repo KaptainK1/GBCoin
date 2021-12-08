@@ -45,14 +45,16 @@ public class MainTest {
         network.notifyObserver(null,null);
         BlockChain.printBlockChain(blockChain);
 
-        HashMap<Wallet, Integer> data = new HashMap<>();
-        data.put(walletA, 2);
-        data.put(walletB, 2);
+//        HashMap<Wallet, Integer> data = new HashMap<>();
+//        data.put(walletA, 2);
+//        data.put(walletB, 2);
 
         while (true) {
             //TODO update next transaction list
             generateTransactions(walletA, walletB, 2, miner1.getTransactionPool());
             generateTransactions(walletB, walletA, 2, miner1.getTransactionPool());
+
+
             //start miners
 
             //set the miner's new transaction list to the combined list of A and B

@@ -18,7 +18,7 @@ public class Transaction implements HashHelper, Beautify {
         // The Inner Output class represents outgoing spend transactions
         // so, we need the Public Key of whom the payment should go to
         // and the amount in GBCoins
-        public class Output implements Beautify, Comparable<Transaction.Output>{
+        public class Output implements Comparable<Transaction.Output>{
 
             private PublicKey publicKey;
             private double value;
@@ -97,7 +97,7 @@ public class Transaction implements HashHelper, Beautify {
             }
         }
 
-        public class Input implements Beautify{
+        public class Input {
 
             private byte[] prevTxHash;
             private int outputIndex;

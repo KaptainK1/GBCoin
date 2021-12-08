@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * Main Miner class
+ */
 public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
 
     private PublicKey publicKey;
@@ -28,8 +31,16 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     private TransactionPool transactionPool;
     private List<Transaction> newTransactions;
     private List<Transaction> currentTransactions;
-    private boolean keepMining = true;
+    private boolean keepMining = false;
 
+    /**
+     * A miner is a node that is actively miner for new blocks as well as verifying transactions
+     * @param minerNetwork the network the miner is apart of
+     * @param transactionNetwork the transaction network that miners are apart of
+     * @param publicKey the public key associated with this miner
+     * @param blockChain a copy of the block chain
+     * @param utxoPool a reference to the utxo pool set
+     */
     public Miner(MinerNetwork minerNetwork, TransactionNetwork transactionNetwork, PublicKey publicKey, BlockChain blockChain, UTXOPool utxoPool) {
 //        this.adjacentMiners = adjacentMiners;
         this.publicKey = publicKey;
@@ -45,15 +56,29 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
 //        this.adjacentMiners = adjacentMiners;
 //    }
 
+    /**
+     * Method to get the public key
+     * @return the public key
+     */
     public PublicKey getPublicKey() {
         return publicKey;
     }
 
+    /**
+     * Method ot set the public key
+     * @param publicKey
+     */
     public void setPublicKey(PublicKey publicKey) {
         this.publicKey = publicKey;
     }
 
     //IMinerObserver interface functions
+
+    /**
+     * Method to update other miners when a puzzle has been solved and a block is being proposed for consensus
+     * @param challenge the challenge that was solved
+     * @param nonce the nonce that solves the challenge
+     */
     @Override
     public void updateMiner(String challenge, String nonce) {
         //TODO need to implement this update miner code
@@ -74,6 +99,13 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     }
     // end IMinerObserver interface functions
 
+    /**
+     * Method to check to see if a block is valid
+     * @param block the block that needs to be checked
+     * @param challenge the challenge that was solved
+     * @param nonce the nonce that solves the challenge
+     * @return True if the block is successfully solved
+     */
     public boolean isBlockValid(Block block, String challenge, String nonce) {
         if (challenge == null && nonce == null) {
             if (!(block instanceof GenesisBlock)) {
@@ -88,7 +120,7 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
 
             //do a check to see if this block is already extended onto the block-chain
             if (Block.getBlockHeight() == blockChain.getBlockHeight()) {
-                if (HashCash.isValidSolution(challenge, nonce, 28)) {
+                if (HashCash.isValidSolution(challenge, nonce, 20)) {
                     if (validateTransactions(block.getTransactions())) {
                         return true;
                     }
@@ -101,6 +133,10 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     }
 
     //ITransactionObserver interface functions
+
+    /**
+     * Method to update this miner when there is a new transaction
+     */
     @Override
     public void updateTransaction() {
         Transaction t = this.transactionNetwork.getTransaction();
@@ -111,6 +147,12 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     // end ITransactionObserver interface functions
 
     //IMiner interface functions
+
+    /**
+     * Method to validate all transactions in the list
+     * @param transactions the list of transactions that need to be validated
+     * @return true if all transations are valid
+     */
     @Override
     public boolean validateTransactions(ArrayList<Transaction> transactions) {
         for (Transaction tx: transactions){
@@ -126,14 +168,17 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
 //
 //    }
 
+    /**
+     * Main method to start mining for a new block
+     */
     @Override
     public void mineNewBlock() {
         //TODO need to implement this code
         //initialize the transactions to add to the block to the list of the new transactions
-        this.currentTransactions = new ArrayList<>(newTransactions);
+        this.currentTransactions = new ArrayList<>(transactionPool.getTransactionList());
 
         //clear out the new transactions list now
-        this.newTransactions.clear();
+        this.transactionPool.clearTransactions();
 
         //get the current timestamp
         long timeStamp = System.currentTimeMillis();
@@ -173,79 +218,62 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     }
     // end IMiner interface functions
 
+    /**
+     * Method to load the next set of transaction
+     * Current this is not being utilized
+     * @return the transaction list that was loaded
+     */
     public ArrayList<Transaction> loadNextTransactions(){
         ArrayList<Transaction> transactions = new ArrayList<>();
         //TODO figure out where to load this transactions from
         return transactions;
     }
 
+    /**
+     * Method to get the new transactions that are not yet in the chain
+     * @return the list of new transactions
+     */
     public List<Transaction> getNewTransactions() {
         return newTransactions;
     }
 
+    /**
+     * Method to set the new transactions that are not yet in the chain
+     * @param newTransactions the list of new transactions
+     */
     public void setNewTransactions(List<Transaction> newTransactions) {
         this.newTransactions = newTransactions;
     }
 
+    /**
+     * Method to get the transactions that are in a block waiting to be put onto the block chain
+     * @return the list of transactions
+     */
     public List<Transaction> getCurrentTransactions() {
         return currentTransactions;
     }
 
+    /**
+     * Method to get the transactions that are in a block waiting to be put onto the block chain
+     * @param currentTransactions the list of transactions
+     */
     public void setCurrentTransactions(List<Transaction> currentTransactions) {
         this.currentTransactions = currentTransactions;
     }
 
+    /**
+     * Method to get the reference to the transaction pool
+     * @return the transaction pool
+     */
     public TransactionPool getTransactionPool() {
         return transactionPool;
     }
 
+    /**
+     * Method to set the reference to the transaction pool
+     * @param transactionPool the reference to the transaction pool
+     */
     public void setTransactionPool(TransactionPool transactionPool) {
         this.transactionPool = transactionPool;
     }
-
-    public static void main(String[] args) throws Exception {
-
-        positiveTest();
-        //network.notifyObserver();
-    }
-
-    public static void positiveTest() throws Exception {
-
-        Wallet walletA = new Wallet();
-        Wallet walletB = new Wallet();
-
-        UTXOPool pool = new UTXOPool();
-        BlockChain blockChain = new BlockChain();
-
-        MinerNetwork network = new MinerNetwork();
-        TransactionNetwork transactionNetwork = new TransactionNetwork();
-
-        Miner miner1 = new Miner(network, transactionNetwork, walletA.getPublicKey(), blockChain, pool);
-        Miner miner2 = new Miner(network, transactionNetwork, walletB.getPublicKey(), blockChain, pool);
-
-        CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(walletA.getPublicKey());
-        miner1.getTransactionPool().addTransaction(coinbaseTransaction);
-
-        HashMap<PublicKey, Double> payments = new HashMap<>();
-        payments.put(walletB.getPublicKey(), 25.0d);
-        miner1.getTransactionPool().spendNewTransaction(25.0d, walletA, payments );
-
-        GenesisBlock block = new GenesisBlock(walletA.getPublicKey(), System.currentTimeMillis());
-        block.hashObject();
-        blockChain.addBlock(block);
-
-        network.addObserver(miner1);
-        network.addObserver(miner2);
-
-        transactionNetwork.addObserver(miner1);
-        transactionNetwork.addObserver(miner2);
-
-        network.setNextBlock(block);
-        network.notifyObserver(null,null);
-        BlockChain.printBlockChain(blockChain);
-        System.out.println("Miner A has: " + miner1.getTransactionPool().getTotalCoins(miner1.getPublicKey()) + " GBCoins");
-        System.out.println("Miner B has: " + miner1.getTransactionPool().getTotalCoins(miner2.getPublicKey()) + " GBCoins");
-    }
-
-
 }
