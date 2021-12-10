@@ -5,6 +5,7 @@ import com.uwgb.GBCoin.API.Services.WalletService;
 import com.uwgb.GBCoin.Miner.Miner;
 import com.uwgb.GBCoin.Miner.MinerNetwork;
 import com.uwgb.GBCoin.Model.*;
+import com.uwgb.GBCoin.Utils.Crypto;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -18,6 +19,7 @@ public class MainTest {
     public static void main(String[] args) throws Exception {
 
         //WalletService service = new WalletService();
+        Wallet walletCoinbase = new Wallet();
         Wallet walletA = new Wallet();
         Wallet walletB = new Wallet();
         UTXOPool pool = new UTXOPool();
@@ -33,9 +35,15 @@ public class MainTest {
 
         //assume Genesis Block and Coinbase Transaction was already found
         CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(walletA.getPublicKey());
-        miner1.getTransactionPool().addTransaction(coinbaseTransaction);
+        byte[] coinbaseSig = Crypto.signMessage(walletCoinbase.getPrivateKey(), coinbaseTransaction.getDataToSign(0));
+        coinbaseTransaction.addSignature(coinbaseSig, 0);
+        //miner1.getTransactionPool().addTransaction(coinbaseTransaction, coinbaseTransaction.getInputs().get(0).getPrevTxHash());
 
-        GenesisBlock block = new GenesisBlock(walletA.getPublicKey(), System.currentTimeMillis());
+        //add coinbase utxo
+        UTXO coinbaseUTXO = new UTXO(coinbaseTransaction.getHash(), 0);
+        pool.addUTXO(coinbaseUTXO, coinbaseTransaction.getOutputs().get(0));
+
+        GenesisBlock block = new GenesisBlock(walletA.getPublicKey(), System.currentTimeMillis(), coinbaseTransaction);
         block.hashObject();
         blockChain.addBlock(block);
 
@@ -45,26 +53,31 @@ public class MainTest {
         network.notifyObserver(null,null);
         BlockChain.printBlockChain(blockChain);
 
-//        HashMap<Wallet, Integer> data = new HashMap<>();
-//        data.put(walletA, 2);
-//        data.put(walletB, 2);
-
         while (true) {
             //TODO update next transaction list
-            generateTransactions(walletA, walletB, 2, miner1.getTransactionPool());
-            generateTransactions(walletB, walletA, 2, miner1.getTransactionPool());
+            generateTransactions(walletA, walletB, 1, miner1.getTransactionPool());
+//            generateTransactions(walletB, walletA, 2, miner1.getTransactionPool());
 
-
-            //start miners
-
-            //set the miner's new transaction list to the combined list of A and B
-            //miner1.setNewTransactions(newTransactionsA);
+//            Transaction tx1 = new Transaction();
+//            tx1.addInput(coinbaseTransaction.getHash(), 0);
+//            tx1.addOutput(50.0d, walletB.getPublicKey());
+//            byte[] signature1 = Crypto.signMessage(walletA.getPrivateKey(), tx1.getDataToSign(0));
+//            tx1.addSignature(signature1, 0);
+//            tx1.hashObject();
+//            miner1.getTransactionPool().addTransaction(tx1, tx1.getHash());
 
             miner1.mineNewBlock();
+            BlockChain.printBlockChain(miner1.getBlockChain());
 
 
         }
 
+
+
+    }
+
+
+    public static void positiveTest(){
 
     }
 

@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 import com.uwgb.GBCoin.Miner.MinerNetwork;
 import com.uwgb.GBCoin.Utils.SHAUtils;
@@ -68,15 +70,15 @@ public class HashCash {
 
     //overloaded constructors
     public HashCash(String resource, long timeStamp){
-        this(1,20, resource, timeStamp);
+        this(1,8, resource, timeStamp);
     }
 
     public HashCash(String resource){
-        this(1,20, resource, System.currentTimeMillis());
+        this(1,8, resource, System.currentTimeMillis());
     }
 
     public HashCash (int version, String resource, long timeStamp){
-        this(version, 20, resource, timeStamp);
+        this(version, 8, resource, timeStamp);
     }
 
     /**
@@ -163,6 +165,12 @@ public class HashCash {
                 //TODO maybe we want to set the nonce to negative values also?
                 setNonce(getNonce() +1);
             }
+
+//            try {
+//                TimeUnit.MILLISECONDS.sleep(500);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
         }
 
@@ -344,7 +352,7 @@ public class HashCash {
 
         hashCash.mine();
 
-        if (HashCash.isValidSolution(hashCash.getChallenge(), Long.toString(hashCash.getNonce()), 20)) {
+        if (HashCash.isValidSolution(hashCash.getChallenge(), Long.toString(hashCash.getNonce()), 8)) {
             System.out.println("Puzzle has valid solution");
             System.out.println(hashCash.getNonce() + " is a valid solution");
         } else {

@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * Main Miner class
@@ -119,10 +116,14 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         } else {
 
             //do a check to see if this block is already extended onto the block-chain
-            if (Block.getBlockHeight() == blockChain.getBlockHeight()) {
-                if (HashCash.isValidSolution(challenge, nonce, 20)) {
+            System.out.println("Number of blocks:" + Block.getBlockHeight());
+            System.out.println("current chain:" + blockChain.getBlockHeight());
+
+            if (Block.getBlockHeight() > blockChain.getBlockHeight() -1) {
+                if (HashCash.isValidSolution(challenge, nonce, 8)) {
                     if (validateTransactions(block.getTransactions())) {
                         return true;
+
                     }
                 }
             }
@@ -151,16 +152,30 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     /**
      * Method to validate all transactions in the list
      * @param transactions the list of transactions that need to be validated
-     * @return true if all transations are valid
+     * @return true if all transactions are valid
      */
     @Override
     public boolean validateTransactions(ArrayList<Transaction> transactions) {
-        for (Transaction tx: transactions){
-            if (!transactionPool.getTransactionHandler().isValidTX(tx)){
-                return false;
-            }
-        }
+        List<Transaction> acceptedTransactions = new ArrayList<>();
+//        for (Transaction tx: transactions){
+//            if (!transactionPool.getTransactionHandler().isValidTX(tx)){
+//                return false;
+//            }
+//            else {
+//                acceptedTransactions.add(tx);
+//            }
+//        }
+//        Transaction[] testTransactions = new Transaction[transactions.size()];
+//        transactions.toArray(testTransactions);
+//        Transaction[] results = transactionPool.getTransactionHandler().handleTransactions(testTransactions);
         return true;
+    }
+
+    private Transaction[] getValidTransactions(List<Transaction> transactions){
+        Transaction[] testTransactions = new Transaction[transactions.size()];
+        transactions.toArray(testTransactions);
+        Transaction[] results = transactionPool.getTransactionHandler().handleTransactions(testTransactions);
+        return results;
     }
 
 //    @Override
@@ -183,8 +198,16 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         //get the current timestamp
         long timeStamp = System.currentTimeMillis();
         //long nonce = 0;
+
+        //add coinbase Transaction
+        this.addCoinbaseTransaction(currentTransactions);
+
+        //set Block to valid transactions
+        Transaction[] results = this.getValidTransactions(currentTransactions);
+        ArrayList<Transaction> acceptedTransactions = new ArrayList<>(Arrays.stream(results).toList());
+
         //create the block
-        Block block = new Block(this.getPublicKey(), blockChain.getCurrentHash(), timeStamp, currentTransactions);
+        Block block = new Block(this.getPublicKey(), blockChain.getCurrentHash(), timeStamp, acceptedTransactions);
 
         try{
             block.hashObject();
@@ -217,6 +240,11 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
             mineNewBlock();
     }
     // end IMiner interface functions
+
+    private void addCoinbaseTransaction(List<Transaction> transactions){
+        CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(this.getPublicKey());
+        transactions.add(coinbaseTransaction);
+    }
 
     /**
      * Method to load the next set of transaction
@@ -275,5 +303,9 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
      */
     public void setTransactionPool(TransactionPool transactionPool) {
         this.transactionPool = transactionPool;
+    }
+
+    public BlockChain getBlockChain(){
+        return this.blockChain;
     }
 }

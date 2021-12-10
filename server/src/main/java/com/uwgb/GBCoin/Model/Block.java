@@ -80,8 +80,9 @@ public class Block implements HashHelper {
     private void initTransactions(PublicKey publicKey, List<Transaction> txs){
 
         ArrayList<Transaction> transactions = new ArrayList<>(txs);
-        CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(publicKey);
-        transactions.add(coinbaseTransaction);
+        //Check
+//        CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(publicKey);
+//        transactions.add(coinbaseTransaction);
         this.setTransactions(transactions);
     }
 

@@ -3,6 +3,7 @@ package com.uwgb.GBCoin.Model;
 import com.uwgb.GBCoin.Utils.Crypto;
 
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +32,7 @@ public class TransactionHandler {
         double outputSum = 0;
 
         // get the set of all claimed utxo's
-        Set<UTXO> claimedUTXO = new HashSet<>(utxoPool.getUTXOs());
+        Set<UTXO> claimedUTXO = new HashSet<>();
 
 
         List<Transaction.Input> inputs = transaction.getInputs();
@@ -40,19 +41,23 @@ public class TransactionHandler {
         //loop through all inputs apart of the transaction
         for (Transaction.Input input: inputs) {
 
-            //check 1: see if the transaction input is available to be spent
-            if (!isConsumedCoinAvailable(input)){
-                return false;
-            }
+            if (!(transaction instanceof CoinbaseTransaction)) {
+                //check 1: see if the transaction input is available to be spent
+                if (!isConsumedCoinAvailable(input)){
+                    return false;
+                }
 
-            //check 3: to see if the signature verifies
-            if (!isSignatureVerified(transaction, index, input)){
-                return false;
-            }
+                //check 3: to see if the signature verifies
+                if (!isSignatureVerified(transaction, index, input)){
+                    return false;
+                }
 
-            //check 3: to see if the transaction is a double spend
-            if (isCoinDoubleSpent(claimedUTXO, input)){
-                return false;
+                //check 3: to see if the transaction is a double spend
+                if (isCoinDoubleSpent(claimedUTXO, input)){
+                    return false;
+                }
+            } else {
+                return true;
             }
 
             //check 4: verify incorrect null address usage
@@ -61,8 +66,11 @@ public class TransactionHandler {
 //            }
 
             UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
-            Transaction.Output correspondingOutput = utxoPool.getTxOutput(utxo);
+            UTXO fromMemory = this.getUTXO(utxo);
+            Transaction.Output correspondingOutput = utxoPool.getTxOutput(fromMemory);
             inputSum += correspondingOutput.getValue();
+
+//            this.utxoPool.removeUTXO(fromMemory);
 
             index++;
         }
@@ -170,7 +178,8 @@ public class TransactionHandler {
     private boolean isSignatureVerified(Transaction transaction, int index, Transaction.Input input){
         UTXOPool utxoPool = new UTXOPool(this.utxoPool);
         UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
-        Transaction.Output correspondingOutput = utxoPool.getTxOutput(utxo);
+        UTXO utxoFromMemory = this.getUTXO(utxo);
+        Transaction.Output correspondingOutput = utxoPool.getTxOutput(utxoFromMemory);
         PublicKey publicKey = correspondingOutput.getPublicKey();
         return Crypto.verifySignature(publicKey, transaction.getDataToSign(index), input.getSignature());
     }
@@ -183,9 +192,24 @@ public class TransactionHandler {
      * false if it doesn't exist
      */
     private boolean isConsumedCoinAvailable(Transaction.Input input){
-        UTXOPool utxoPool = new UTXOPool(this.utxoPool);
+//        UTXOPool utxoPool = this.utxoPool;
+//        UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
         UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
-        return utxoPool.contains(utxo);
+        UTXO foundUTXO = null;
+        for (UTXO utxos: utxoPool.getUTXOs()) {
+            if (utxo.equals(utxos))   
+                foundUTXO = utxos;
+        }
+        
+        return utxoPool.contains(foundUTXO);
+    }
+
+    private UTXO getUTXO(UTXO utxo){
+        for (UTXO utxos: utxoPool.getUTXOs()) {
+            if (utxo.equals(utxos))
+                return utxos;
+        }
+        return null;
     }
 
     private boolean doesConsumedCoinHaveNullAddress(Transaction transaction){
@@ -212,5 +236,39 @@ public class TransactionHandler {
 
     public void setTransactionFees(double transactionFees) {
         this.transactionFees = transactionFees;
+    }
+
+    public Transaction[] handleTransactions(Transaction[] transactions){
+        List<Transaction> acceptedTransactions = new ArrayList<>();
+        for (int i = 0; i < transactions.length; i++) {
+            Transaction transaction = transactions[i];
+            if (isValidTX(transaction)){
+                acceptedTransactions.add(transaction);
+                removeConsumedCoins(transaction);
+                addCoinsToUTXOPool(transaction);
+            }
+        }
+        Transaction[] results = new Transaction[acceptedTransactions.size()];
+        acceptedTransactions.toArray(results);
+        return results;
+    }
+
+    public void addCoinsToUTXOPool(Transaction transaction){
+        List<Transaction.Output> outputs = transaction.getOutputs();
+        for (int i = 0; i < outputs.size(); i++) {
+            Transaction.Output output = outputs.get(i);
+            UTXO utxo = new UTXO(transaction.getHash(), i);
+            utxoPool.addUTXO(utxo, output);
+        }
+    }
+
+    public void removeConsumedCoins(Transaction tx){
+        List<Transaction.Input> inputs = tx.getInputs();
+        for (int i = 0; i < inputs.size(); i++){
+            Transaction.Input input = inputs.get(i);
+            UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
+            UTXO fromMemory = this.getUTXO(utxo);
+            this.utxoPool.removeUTXO(fromMemory);
+        }
     }
 }

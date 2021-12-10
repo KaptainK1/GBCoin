@@ -22,6 +22,7 @@ public class CoinbaseTransaction extends Transaction{
         Arrays.fill(nullAddress, (byte) 0);
         double blockReward = calculateBlockReward();
         this.addInput(nullAddress, 0);
+        this.addSignature(nullAddress,0);
         this.addOutput(blockReward, publicKey);
         try {
             super.hashObject();

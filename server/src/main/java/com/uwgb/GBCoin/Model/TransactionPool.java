@@ -29,14 +29,13 @@ public class TransactionPool {
         transactionHandler= new TransactionHandler(pool);
     }
 
-    public void addTransaction(Transaction t){
+    public void addTransaction(Transaction t, byte[] hash){
         transactionList.add(t);
 
         //for each transaction output, add a new utxo as these are now available to be spent
-        for (int i = 0; i < t.getOutputs().size(); i++) {
-//            System.out.println(SHAUtils.bytesToHex(t.getHash()));
-            addUTXO(t.getHash(), i, t.getOutputs().get(i));
-        }
+//        for (int j = 0; j < t.getOutputs().size(); j++) {
+//            addUTXO(hash,j, t.getOutputs().get(j));
+//        }
 
     }
 
@@ -153,7 +152,10 @@ public class TransactionPool {
         transaction.hashObject();
 
         //add the transactions to the transaction list
-        this.addTransaction(transaction);
+//        for (int i = 0; i < transaction.getInputs().size(); i++) {
+//            this.addTransaction(transaction, transaction.getInputs().get(i).getPrevTxHash());
+//        }
+        this.addTransaction(transaction, transaction.getHash());
 
 //        for (UTXO utxo: utxos) {
 ////            this.removeUTXO(utxo.getTxhash(), utxo.getIndex());
@@ -163,9 +165,9 @@ public class TransactionPool {
         //remove used unspent transactions outputs
         //because in bitcoin, a coin is consumed fully
         //so the "change" needs to be a new transaction
-        for (UTXO pickedUTXO : pickedUTXOs) {
-            this.removeUTXO(pickedUTXO);
-        }
+//        for (UTXO pickedUTXO : pickedUTXOs) {
+//            this.removeUTXO(pickedUTXO);
+//        }
     }
 
     /**
@@ -239,7 +241,7 @@ public class TransactionPool {
 //        utxoPool.addUTXO(utxo, );
 //    }
 
-    public void addUTXO(byte[] hash, int index, Transaction.Output output){
+    public void addUTXO(byte[] hash,int index, Transaction.Output output){
         UTXO utxo = new UTXO(hash, index);
         utxoPool.addUTXO(utxo, output);
     }
@@ -275,11 +277,18 @@ public class TransactionPool {
                 return false;
             }
         }
+        removeConsumedCoins(this.transactionList);
         return true;
     }
 
     public void clearTransactions(){
         this.transactionList.clear();
+    }
+
+    public void removeConsumedCoins(List<Transaction> transactions){
+        for (Transaction tx: transactions) {
+            this.transactionHandler.removeConsumedCoins(tx);
+        }
     }
 
     public List<Transaction> getTransactionList() {
