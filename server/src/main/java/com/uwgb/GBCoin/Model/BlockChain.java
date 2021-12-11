@@ -30,15 +30,6 @@ public class BlockChain implements Serializable {
         blockChain.add(block);
     }
 
-//    public void addUTXO(UTXO utxo, Transaction.Input input){
-//        Transaction.Output correspondingOutput = utxoPool.getTxOutput(utxo);
-//        this.utxoPool.addUTXO(utxo, correspondingOutput);
-//    }
-//
-//    public void removeUTXO(UTXO utxo){
-//        this.utxoPool.removeUTXO(utxo);
-//    }
-
     public byte[] getCurrentHash(){
         Block block = this.blockChain.get(this.blockChain.size() -1);
         return block.getHash();

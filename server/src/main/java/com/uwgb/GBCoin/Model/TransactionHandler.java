@@ -212,24 +212,6 @@ public class TransactionHandler {
         return null;
     }
 
-    private boolean doesConsumedCoinHaveNullAddress(Transaction transaction){
-
-        byte[] nullAddress = new byte[32];
-
-        for (Transaction.Input input: transaction.getInputs()){
-
-            if (input.getPrevTxHash() == nullAddress){
-                if (transaction instanceof CoinbaseTransaction){
-                    continue;
-                } else {
-                    System.out.println("Transaction contains null address but is not a coinbase transaction");
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     public double getTransactionFees() {
         return transactionFees;
     }
@@ -238,10 +220,18 @@ public class TransactionHandler {
         this.transactionFees = transactionFees;
     }
 
+    /**
+     * Method to check for valid transactions then add and remove those coins
+     * @param transactions the transaction list we need to check
+     * @return all valid transactions
+     */
     public Transaction[] handleTransactions(Transaction[] transactions){
         List<Transaction> acceptedTransactions = new ArrayList<>();
         for (int i = 0; i < transactions.length; i++) {
             Transaction transaction = transactions[i];
+            //check to see if the transaction is valid
+            //if so, add the transaction to the accepted transaction list then,
+            //remove those utxo coins and make new ones
             if (isValidTX(transaction)){
                 acceptedTransactions.add(transaction);
                 removeConsumedCoins(transaction);
@@ -253,6 +243,12 @@ public class TransactionHandler {
         return results;
     }
 
+    /**
+     * Method to add new coins from a new transaction
+     * Since in Bitcoin, a transaction is consumed wholly
+     * and change is sent back as a new coin
+     * @param transaction the transaction we need to add coins for
+     */
     public void addCoinsToUTXOPool(Transaction transaction){
         List<Transaction.Output> outputs = transaction.getOutputs();
         for (int i = 0; i < outputs.size(); i++) {
@@ -262,8 +258,12 @@ public class TransactionHandler {
         }
     }
 
-    public void removeConsumedCoins(Transaction tx){
-        List<Transaction.Input> inputs = tx.getInputs();
+    /**
+     * Method to remove the consumed coins
+     * @param transaction the transaction we need to remove used coins from
+     */
+    public void removeConsumedCoins(Transaction transaction){
+        List<Transaction.Input> inputs = transaction.getInputs();
         for (int i = 0; i < inputs.size(); i++){
             Transaction.Input input = inputs.get(i);
             UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());

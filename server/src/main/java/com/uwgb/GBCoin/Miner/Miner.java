@@ -120,8 +120,6 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
             System.out.println("current chain:" + blockChain.getBlockHeight());
 
             if (!isHashValid(blockChain.getCurrentHash(), block)){
-                System.out.println(blockChain.getBlockHeight());
-                System.out.println(block.getPreviousHash());
                 return false;
             }
 
