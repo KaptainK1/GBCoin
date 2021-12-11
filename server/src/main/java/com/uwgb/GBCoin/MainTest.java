@@ -81,6 +81,11 @@ public class MainTest {
             //finally, print the miner's version of the blockchain
             BlockChain.printBlockChain(miner1.getBlockChain());
 
+            //print the current UTXOs available
+            for (UTXO utxo: pool.getUTXOs()) {
+                System.out.println(utxo);
+            }
+
         }
     }
 
@@ -97,39 +102,5 @@ public class MainTest {
         }
 //        return transactionPool.getTransactionList();
     }
-
-    private static List<Transaction> generateTransactions(HashMap<Wallet, Integer> data, TransactionPool transactionPool) throws TransactionException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException {
-        Iterator<Wallet> iterator = data.keySet().iterator();
-
-        Map.Entry<Wallet, Integer> entry = data.entrySet().iterator().next();
-        Wallet firstWallet = entry.getKey();
-
-        //fill in iterator has next here
-//        while()
-
-        for (Wallet wallet: data.keySet()) {
-            int numOfTransactions = data.get(wallet);
-
-            for (int i = 0; i < numOfTransactions; i++) {
-                double maxSpendAmount = transactionPool.getTotalCoins(wallet.getPublicKey());
-                double randomAmount = ThreadLocalRandom.current().nextDouble(0, maxSpendAmount / 2);
-
-                Wallet receiverWallet;
-                if (iterator.hasNext()){
-                    receiverWallet = iterator.next();
-                } else {
-                    receiverWallet = firstWallet;
-                }
-
-                HashMap<PublicKey, Double> receiverKeys = new HashMap<>();
-                receiverKeys.put(receiverWallet.getPublicKey(), randomAmount);
-
-                transactionPool.spendNewTransaction(randomAmount, wallet, receiverKeys);
-            }
-        }
-
-        return transactionPool.getTransactionList();
-    }
-
 
 }

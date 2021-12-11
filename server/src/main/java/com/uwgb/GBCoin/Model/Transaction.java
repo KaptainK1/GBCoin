@@ -3,6 +3,7 @@ package com.uwgb.GBCoin.Model;
 import com.uwgb.GBCoin.Interfaces.Beautify;
 import com.uwgb.GBCoin.Interfaces.HashHelper;
 import com.uwgb.GBCoin.Utils.Crypto;
+import com.uwgb.GBCoin.Utils.SHAUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -200,32 +201,6 @@ public class Transaction implements HashHelper, Beautify {
         this.getInputs().remove(index);
     }
 
-    // below code needs to be removed eventually, as its a placeholder for the merkle tree
-//    public double getAmount() {
-//        return amount;
-//    }
-//
-//    public void setAmount(double amount) {
-//        this.amount = amount;
-//    }
-//
-//    public String getTitle() {
-//        return title;
-//    }
-//
-//    public void setTitle(String title) {
-//        this.title = title;
-//    }
-//
-//    private double amount;
-//    private String title;
-//
-//    public Transaction(String title, double amount){
-//        this.amount = amount;
-//        this.title = title;
-//    }
-    // above code needs to be removed eventually, as its a placeholder for the merkle tree
-
     public byte[] getDataToSign(int inputIndex){
         // get the specified input and all of its outputs
         ArrayList<Byte> signatureData = new ArrayList<>();
@@ -349,11 +324,11 @@ public class Transaction implements HashHelper, Beautify {
 
     }
 
-    @Override
-    public String toString(){
-        //return ("Transaction:" + title + '\n' + "Amount: $" + this.amount);
-        return this.beautify(this);
-    }
+//    @Override
+//    public String toString(){
+//        //return ("Transaction:" + title + '\n' + "Amount: $" + this.amount);
+//        return this.beautify(this);
+//    }
 
     @Override
     public void hashObject() throws IOException {
@@ -388,5 +363,32 @@ public class Transaction implements HashHelper, Beautify {
 
     public void setOutputs(ArrayList<Output> outputs) {
         this.outputs = outputs;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder builder = new StringBuilder();
+        for (Input input: getInputs()) {
+            builder.append("Previous Transaction Hash: ");
+            builder.append(SHAUtils.encodeBytes(input.getPrevTxHash()));
+            builder.append("\n");
+            builder.append("Previous Output Index: ");
+            builder.append(input.getOutputIndex());
+            builder.append("\n");
+        }
+        for (Output output: getOutputs()){
+            builder.append("Receiver of this output tx: ");
+            builder.append(SHAUtils.encodeBytes(output.getPublicKey().getEncoded()));
+            builder.append("\n");
+            builder.append("Output value: \u20BF");
+            builder.append(output.getValue());
+            builder.append("\n");
+        }
+        if (this.hash != null) {
+            builder.append("Hash of this Transaction: ");
+            builder.append(SHAUtils.encodeBytes(this.hash));
+            builder.append("\n");
+        }
+        return builder.toString();
     }
 }
