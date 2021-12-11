@@ -119,6 +119,12 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
             System.out.println("Number of blocks:" + Block.getBlockHeight());
             System.out.println("current chain:" + blockChain.getBlockHeight());
 
+            if (!isHashValid(blockChain.getCurrentHash(), block)){
+                System.out.println(blockChain.getBlockHeight());
+                System.out.println(block.getPreviousHash());
+                return false;
+            }
+
             if (Block.getBlockHeight() > blockChain.getBlockHeight() -1) {
                 if (HashCash.isValidSolution(challenge, nonce, 8)) {
                     if (validateTransactions(block.getTransactions())) {
@@ -131,6 +137,17 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
             return false;
 
         }
+    }
+
+    private boolean isHashValid(byte[] prevBlockHash, Block block){
+        byte[] prevHash = Arrays.copyOf(prevBlockHash, prevBlockHash.length);
+        byte[] currentBlockHash = Arrays.copyOf(block.getPreviousHash(), block.getPreviousHash().length);
+
+        for (int i = 0; i < currentBlockHash.length; i++) {
+            if (prevHash[i] != currentBlockHash[i])
+                return false;
+        }
+        return true;
     }
 
     //ITransactionObserver interface functions

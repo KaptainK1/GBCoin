@@ -241,45 +241,45 @@ public class TransactionPool {
 //        utxoPool.addUTXO(utxo, );
 //    }
 
-    public void addUTXO(byte[] hash,int index, Transaction.Output output){
-        UTXO utxo = new UTXO(hash, index);
-        utxoPool.addUTXO(utxo, output);
-    }
+//    public void addUTXO(byte[] hash,int index, Transaction.Output output){
+//        UTXO utxo = new UTXO(hash, index);
+//        utxoPool.addUTXO(utxo, output);
+//    }
 
     /**
      * function to remove the given utxo from the utxo set
      * which means it was spent
-     * @param hash the hash of the transaction from which we are able to be spending
-     * @param outputIndex the output index of said transaction
+//     * @param hash the hash of the transaction from which we are able to be spending
+//     * @param outputIndex the output index of said transaction
      */
-    public void removeUTXO(byte[] hash, int outputIndex){
-        UTXO utxo = new UTXO(hash, outputIndex);
-        if (utxoPool.contains(utxo)){
-            utxoPool.removeUTXO(utxo);
-            System.out.println("UTXO removed");
-        } else {
-            System.out.println("UTXO doesnt exist, so nothing was removed");
-        }
-    }
-
-    public void removeUTXO(UTXO utxo){
-        if (utxoPool.contains(utxo)){
-            utxoPool.removeUTXO(utxo);
-            System.out.println("UTXO removed");
-        } else {
-            System.out.println("UTXO doesnt exist, so nothing was removed");
-        }
-    }
-
-    public boolean validateTransactions() {
-        for (Transaction tx: this.transactionList){
-            if (!transactionHandler.isValidTX(tx)){
-                return false;
-            }
-        }
-        removeConsumedCoins(this.transactionList);
-        return true;
-    }
+//    public void removeUTXO(byte[] hash, int outputIndex){
+//        UTXO utxo = new UTXO(hash, outputIndex);
+//        if (utxoPool.contains(utxo)){
+//            utxoPool.removeUTXO(utxo);
+//            System.out.println("UTXO removed");
+//        } else {
+//            System.out.println("UTXO doesnt exist, so nothing was removed");
+//        }
+//    }
+//
+//    public void removeUTXO(UTXO utxo){
+//        if (utxoPool.contains(utxo)){
+//            utxoPool.removeUTXO(utxo);
+//            System.out.println("UTXO removed");
+//        } else {
+//            System.out.println("UTXO doesnt exist, so nothing was removed");
+//        }
+//    }
+//
+//    public boolean validateTransactions() {
+//        for (Transaction tx: this.transactionList){
+//            if (!transactionHandler.isValidTX(tx)){
+//                return false;
+//            }
+//        }
+//        removeConsumedCoins(this.transactionList);
+//        return true;
+//    }
 
     public void clearTransactions(){
         this.transactionList.clear();
