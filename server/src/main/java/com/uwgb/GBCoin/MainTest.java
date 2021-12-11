@@ -1,87 +1,106 @@
-/*
-import Interfaces.Beautify;
-import Model.Transaction;
-import Model.Wallet;
-import Utils.Crypto;
+package com.uwgb.GBCoin;
 
+import com.uwgb.GBCoin.API.Exceptions.TransactionException;
+import com.uwgb.GBCoin.API.Services.WalletService;
+import com.uwgb.GBCoin.Miner.Miner;
+import com.uwgb.GBCoin.Miner.MinerNetwork;
+import com.uwgb.GBCoin.Model.*;
+import com.uwgb.GBCoin.Utils.Crypto;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MainTest {
 
     public static void main(String[] args) throws Exception {
 
-        dylanTestStuff();
+        //Create a few simple wallets
+        Wallet walletCoinbase = new Wallet();
+        Wallet walletA = new Wallet();
+        Wallet walletB = new Wallet();
 
+        //create the utxo pool which is shared between miners
+        UTXOPool pool = new UTXOPool();
+
+        //create the blockchain
+        BlockChain blockChain = new BlockChain();
+
+        //create the minter network and transaction networks
+        //these are simple publisher/subscriber patterns to simulate a distributed network
+        MinerNetwork network = new MinerNetwork();
+        TransactionNetwork transactionNetwork = new TransactionNetwork();
+
+        //create two miners in this environment to simulate a distributed network
+        Miner miner1 = new Miner(network, transactionNetwork, walletA.getPublicKey(), blockChain, pool);
+        Miner miner2 = new Miner(network, transactionNetwork, walletB.getPublicKey(), blockChain, pool);
+
+        //add each miner to the miner network and transaction network
+        network.addObserver(miner1);
+        network.addObserver(miner2);
+        transactionNetwork.addObserver(miner1);
+        transactionNetwork.addObserver(miner2);
+
+        //assume Genesis Block and Coinbase Transaction was already found
+        CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(walletA.getPublicKey());
+        byte[] coinbaseSig = Crypto.signMessage(walletCoinbase.getPrivateKey(), coinbaseTransaction.getDataToSign(0));
+        coinbaseTransaction.addSignature(coinbaseSig, 0);
+
+        //add coinbase utxo to utxo pool as it is available to be spent
+        UTXO coinbaseUTXO = new UTXO(coinbaseTransaction.getHash(), 0);
+        pool.addUTXO(coinbaseUTXO, coinbaseTransaction.getOutputs().get(0));
+
+        //create the genesis block which we assumed to be found already
+        GenesisBlock block = new GenesisBlock(walletA.getPublicKey(), System.currentTimeMillis(), coinbaseTransaction);
+        block.hashObject();
+
+        //add said genesis block to the block chain
+        blockChain.addBlock(block);
+
+        //clear all transactions from the miner's pool
+        miner1.getTransactionPool().clearTransactions();
+
+        //by using the miner network, notify each subscriber of the new genesis block
+        network.setNextBlock(block);
+        network.notifyObserver(null,null);
+        BlockChain.printBlockChain(blockChain);
+
+
+        //run this loop forever which generates fake transactions then mines a new block
+        while (true) {
+            // generate a fake transaction from WalletA to WalletB
+            //we pick from WalletA > B because in the above scenario, we assume the genesis block was found by minerA
+            generateTransactions(walletA, walletB, 1, miner1.getTransactionPool());
+
+            //run the mine block method
+            miner1.mineNewBlock();
+
+            //finally, print the miner's version of the blockchain
+            BlockChain.printBlockChain(miner1.getBlockChain());
+
+            //print the current UTXOs available
+            for (UTXO utxo: pool.getUTXOs()) {
+                System.out.println(utxo);
+            }
+
+        }
     }
 
-    public static void dylanTestStuff() throws Exception {
 
-        //Create some test wallets
-        Wallet dylanWallet = new Wallet();
-        Wallet zachWallet = new Wallet();
-        Wallet jonWallet = new Wallet();
+    private static void generateTransactions(Wallet spender, Wallet receiver, int numberOfTransactions, TransactionPool transactionPool) throws TransactionException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException {
 
-        System.out.println("----Private and Public Keys----");
-        System.out.println((dylanWallet.getPrivateKey()));
-        System.out.println((dylanWallet.getPublicKey()));
+        for (int i = 0; i < numberOfTransactions; i++) {
+            double maxSpendAmount = transactionPool.getTotalCoins(spender.getPublicKey());
+            double randomAmount = ThreadLocalRandom.current().nextDouble(0, maxSpendAmount / 2);
 
-        System.out.println((zachWallet.getPrivateKey()));
-        System.out.println((zachWallet.getPublicKey()));
-
-        System.out.println((jonWallet.getPrivateKey()));
-        System.out.println((jonWallet.getPublicKey()));
-
-
-        Transaction tx = new Transaction();
-        tx.addOutput(10.2, zachWallet.getPublicKey());
-        tx.finalize();
-
-        System.out.println(tx.getOutputs().get(0));
-
-        //Order of operations:
-        /*
-        1. Create a new blank transaction
-        2. Create a new transaction.Input Where
-            the first parameter is the hash of a previous output
-            and the output lines up with said previous output
-        3. Add a transaction.Output to the new transaction
-             specific the value and the address to whom the coins should go to
-        4. Create the signature (as a byte array) by calling Crypto.signMessage
-            with the parameters of
-                1. Private key of the person who is spending the coins
-                2. the data to be signed (i.e. the entire transaction
-
-        5. add the new signature to the transaction
-        6. Call finalize to hash the transaction
-        7. To verify run the Crypto.verifySignature function
-            with the following parameters:
-                1. the public key of the person who spent the coins
-                2. the transaction data that we want to sign. i.e. all the data for the entire transaction
-                3. the signature of the transaction
-         7.1 IF everything lines up, then the signature is valid so return true, else false
-         */
-/*
-        Transaction zachToJon = new Transaction();
-        zachToJon.addInput(tx.getHash(), 0);
-        zachToJon.addOutput(10.1,jonWallet.getPublicKey());
-        byte[] data = Crypto.signMessage(zachWallet.getPrivateKey(), zachToJon.getDataToSign(0));
-        zachToJon.addSignature(data,0);
-        System.out.println(data.length);
-        zachToJon.finalize();
-
-        zachToJon.addSignature(data, 0);
-        System.out.println(zachToJon.getInputs().get(0).getSignature().length);
-
-       System.out.println(Crypto.verifySignature(zachWallet.getPublicKey(), zachToJon.getDataToSign(0), zachToJon.getInputs().get(0).getSignature()));
-
-
+            HashMap<PublicKey, Double> data = new HashMap<>();
+            data.put(receiver.getPublicKey(), randomAmount);
+            transactionPool.spendNewTransaction(randomAmount, spender, data);
+        }
+//        return transactionPool.getTransactionList();
     }
-
-
 
 }
-*/

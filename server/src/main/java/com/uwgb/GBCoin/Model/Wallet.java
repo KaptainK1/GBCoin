@@ -1,10 +1,15 @@
 package com.uwgb.GBCoin.Model;
 
+import com.uwgb.GBCoin.API.Repositories.WalletRepository;
+import com.uwgb.GBCoin.API.Services.WalletService;
 import org.hibernate.annotations.Type;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.security.*;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * The wallet class will hold both private and public keys
@@ -71,5 +76,4 @@ public class Wallet {
     public PrivateKey getPrivateKey() {
         return privateKey;
     }
-
 }

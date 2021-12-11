@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-public class UXTOPool {
+public class UTXOPool {
 
     /**
      * the UTXOPool is a data structure to hold all the transaction outputs
@@ -12,8 +12,12 @@ public class UXTOPool {
      */
     private HashMap<UTXO, Transaction.Output> utxoPool;
 
-    public UXTOPool(){
+    public UTXOPool(){
         utxoPool = new HashMap<>();
+    }
+
+    public UTXOPool(UTXOPool utxoPool){
+        this.utxoPool = new HashMap<>(utxoPool.utxoPool);
     }
 
     /**
@@ -35,6 +39,15 @@ public class UXTOPool {
     }
 
     /**
+     *
+     * @param utxo
+     * @return return the utxo's corresponding output
+     */
+    public Transaction.Output getTxOutput(UTXO utxo){
+        return utxoPool.get(utxo);
+    }
+
+    /**
      * method to check if an utxo is available to spend
      * if it is in the pool, then it is available, otherwise it may have been spent already
      * or simply does not exist. either way it could be a malicious spend attack
@@ -50,8 +63,11 @@ public class UXTOPool {
      * @return returns an array list of all the current utxos that are available to spend
      */
     public ArrayList<UTXO> getUTXOs(){
-        Set<UTXO> utxoSet= this.utxoPool.keySet();
+        Set<UTXO> utxoSet = this.utxoPool.keySet();
         return new ArrayList<>(utxoSet);
     }
 
+    public HashMap<UTXO, Transaction.Output> getUtxoPool() {
+        return utxoPool;
+    }
 }

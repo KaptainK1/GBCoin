@@ -3,13 +3,13 @@ package com.uwgb.GBCoin.Model;
 import com.uwgb.GBCoin.Interfaces.Beautify;
 import com.uwgb.GBCoin.Interfaces.HashHelper;
 import com.uwgb.GBCoin.Utils.Crypto;
+import com.uwgb.GBCoin.Utils.SHAUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ public class Transaction implements HashHelper, Beautify {
         // The Inner Output class represents outgoing spend transactions
         // so, we need the Public Key of whom the payment should go to
         // and the amount in GBCoins
-        public class Output implements Beautify{
+        public class Output implements Comparable<Transaction.Output>{
 
             private PublicKey publicKey;
             private double value;
@@ -47,22 +47,71 @@ public class Transaction implements HashHelper, Beautify {
                     builder.append("\n");
                     return builder.toString();
                 }
+
+            public PublicKey getPublicKey() {
+                return publicKey;
+            }
+
+            public void setPublicKey(PublicKey publicKey) {
+                this.publicKey = publicKey;
+            }
+
+            public double getValue() {
+                return value;
+            }
+
+            public void setValue(double value) {
+                this.value = value;
+            }
+
+            @Override
+            public int compareTo(@NotNull Transaction.Output o) {
+                    if (this.value < o.getValue()){
+                        return -1;
+                    } else if (this.value > o.getValue()){
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+            }
+
+            public boolean equals(Object other){
+                if (other == null){
+                    return false;
+                }
+
+                if (getClass() != other.getClass()){
+                    return false;
+                }
+
+                Transaction.Output output = (Transaction.Output)other;
+
+                if (this.value != output.value){
+                    return false;
+                }
+
+                if (this.getPublicKey() != output.getPublicKey()){
+                    return false;
+                }
+
+                return true;
+            }
         }
 
-        public class Input implements Beautify{
+        public class Input {
 
-            private byte[] prevOutputHash;
+            private byte[] prevTxHash;
             private int outputIndex;
             private byte[] signature;
 
-            public Input(byte[] prevOutputHash, int outputIndex, byte[] signature){
+            public Input(byte[] prevTxHash, int outputIndex, byte[] signature){
                 this.setSignature(signature);
                 this.setOutputIndex(outputIndex);
-                this.setPrevOutputHash(prevOutputHash);
+                this.setPrevTxHash(prevTxHash);
             }
 
-            public Input(byte[] prevOutputHash, int outputIndex){
-                this(prevOutputHash, outputIndex, null);
+            public Input(byte[] prevTxHash, int outputIndex){
+                this(prevTxHash, outputIndex, null);
             }
 
             public void addSignature(byte[] signature){
@@ -77,12 +126,12 @@ public class Transaction implements HashHelper, Beautify {
              *
              * @return
              */
-            public byte[] getPrevOutputHash() {
-                return prevOutputHash;
+            public byte[] getPrevTxHash() {
+                return prevTxHash;
             }
 
-            public void setPrevOutputHash(byte[] prevOutputHash) {
-                this.prevOutputHash = prevOutputHash.clone();
+            public void setPrevTxHash(byte[] prevTxHash) {
+                this.prevTxHash = prevTxHash.clone();
             }
 
             public int getOutputIndex() {
@@ -152,30 +201,6 @@ public class Transaction implements HashHelper, Beautify {
         this.getInputs().remove(index);
     }
 
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    private double amount;
-    private String title;
-
-    public Transaction(String title, double amount){
-        this.amount = amount;
-        this.title = title;
-    }
-
     public byte[] getDataToSign(int inputIndex){
         // get the specified input and all of its outputs
         ArrayList<Byte> signatureData = new ArrayList<>();
@@ -189,7 +214,7 @@ public class Transaction implements HashHelper, Beautify {
         Input input = this.getInputs().get(inputIndex);
 
         //get the hash of the input data
-        byte[] hash = input.getPrevOutputHash();
+        byte[] hash = input.getPrevTxHash();
 
         //create  a new byte buffer and add our index
         ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.SIZE / 8);
@@ -256,7 +281,7 @@ public class Transaction implements HashHelper, Beautify {
         for (Input input : this.getInputs()){
             inputBuffer.putInt(input.getOutputIndex());
             byte[] outputIndex = inputBuffer.array();
-            byte[] hash = input.getPrevOutputHash();
+            byte[] hash = input.getPrevTxHash();
 
             for (Byte b: outputIndex) {
                 transactionData.add(b);
@@ -299,13 +324,14 @@ public class Transaction implements HashHelper, Beautify {
 
     }
 
-    @Override
-    public String toString(){
-        //return ("Transaction:" + title + '\n' + "Amount: $" + this.amount);
-        return this.beautify(this);
-    }
+//    @Override
+//    public String toString(){
+//        //return ("Transaction:" + title + '\n' + "Amount: $" + this.amount);
+//        return this.beautify(this);
+//    }
 
-    public void finalize() {
+    @Override
+    public void hashObject() throws IOException {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(this.toByteArray());
@@ -337,5 +363,32 @@ public class Transaction implements HashHelper, Beautify {
 
     public void setOutputs(ArrayList<Output> outputs) {
         this.outputs = outputs;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder builder = new StringBuilder();
+        for (Input input: getInputs()) {
+            builder.append("Previous Transaction Hash: ");
+            builder.append(SHAUtils.encodeBytes(input.getPrevTxHash()));
+            builder.append("\n");
+            builder.append("Previous Output Index: ");
+            builder.append(input.getOutputIndex());
+            builder.append("\n");
+        }
+        for (Output output: getOutputs()){
+            builder.append("Receiver of this output tx: ");
+            builder.append(SHAUtils.encodeBytes(output.getPublicKey().getEncoded()));
+            builder.append("\n");
+            builder.append("Output value: \u20BF");
+            builder.append(output.getValue());
+            builder.append("\n");
+        }
+        if (this.hash != null) {
+            builder.append("Hash of this Transaction: ");
+            builder.append(SHAUtils.encodeBytes(this.hash));
+            builder.append("\n");
+        }
+        return builder.toString();
     }
 }

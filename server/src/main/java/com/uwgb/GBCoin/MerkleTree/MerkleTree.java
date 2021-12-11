@@ -8,12 +8,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 
 public class MerkleTree {
 
-    private MerkleNode merkleRoot;
+    public MerkleNode merkleRoot;
     private int size;
     private int levels;
     public String hashingAlgorithm = "SHA-256";
@@ -26,6 +27,11 @@ public class MerkleTree {
 
         //calculate the number of levels needed for our tree1
         this.levels = (int) Math.ceil((Math.log10(size) / Math.log10(2)));
+
+        if (this.levels == 0 ){
+            this.levels = 1;
+        }
+
         System.out.println("Levels: " + this.levels);
 
         //create all the leaf nodes
@@ -41,7 +47,7 @@ public class MerkleTree {
             byte[] data = unspentTransaction.toByteArray();
 
             //add the leaf node
-            leafs.add(new MerkleNode(SHAUtils.digest(data, hashingAlgorithm), unspentTransaction.getTitle(), null, null));
+            leafs.add(new MerkleNode(SHAUtils.digest(data, hashingAlgorithm), null, null));
 
         }
 
@@ -52,15 +58,25 @@ public class MerkleTree {
         //a power of two.
         for (int i = 0; i < numberOfDuplicateNodes; i++) {
             //TODO this will need to be updated once we have our Transaction Class, we should be hashing the entire object
-            leafs.add(new MerkleNode(leafs.get(i+size -1).getData(), leafs.get(i+size -1).getUnHashedData() ,null,null));
+//            leafs.add(new MerkleNode(leafs.get(i+size -1).getData(), leafs.get(i+size -1).getUnHashedData() ,null,null));
+            leafs.add(new MerkleNode(leafs.get(i+size -1).getData() ,null,null));
         }
 
-        buildMerkleTree(unspentTransactions);
+        if (this.size == 1){
+            this.merkleRoot = new MerkleNode(unspentTransactions.get(0).getHash(), null, null);
+        } else if (this.size < 3){
+            byte[] combinedHash = getDataForHashing(unspentTransactions.get(0).getHash(), unspentTransactions.get(1).getHash());
+            MerkleNode leftNode = new MerkleNode(unspentTransactions.get(0).getHash(), null, null);
+            MerkleNode rightNode = new MerkleNode(unspentTransactions.get(1).getHash(), null, null);
+            this.merkleRoot = new MerkleNode(combinedHash, leftNode, rightNode);
+        } else {
+            buildMerkleTree();
+        }
 
     }
 
     //function to build the Merkle Tree from the bottom up
-    public void buildMerkleTree(ArrayList<Transaction> unspentTransactions){
+    public void buildMerkleTree(){
 
         //function to create the immediate parents to our Transaction data blocks
         createDirectParents();
@@ -87,15 +103,18 @@ public class MerkleTree {
 
                 //combine the hash of the parent's 2 children
                 //TODO this will need to be updated once we have our Transaction Class, we should be hashing the entire object
-                byte[] combinedHash = getHash((parents.get(k).getUnHashedData() + parents.get(k+1).getUnHashedData()));
+
+                byte[] combinedHash = getDataForHashing(parents.get(k).getData(), parents.get(k+1).getData());
+//                byte[] combinedHash = getHash((parents.get(k).getUnHashedData() + parents.get(k+1).getUnHashedData()));
 //                byte[] combinedHash = SHAUtils.concatenateHash(parents.get(k).getUnHashedData().getBytes(StandardCharsets.UTF_8),
 //                                                                parents.get(k+1).getUnHashedData().getBytes(StandardCharsets.UTF_8),
 //                                                                hashingAlgorithm);
 
                 //now create the new node and add it to our parents arraylist
-                MerkleNode node = new MerkleNode(combinedHash,parents.get(k).getUnHashedData() + parents.get(k+1).getUnHashedData(),
-                                                    parents.get(k),
-                                                    parents.get(k+1));
+//                MerkleNode node = new MerkleNode(combinedHash,parents.get(k).getUnHashedData() + parents.get(k+1).getUnHashedData(),
+//                                                    parents.get(k),
+//                                                    parents.get(k+1));
+                MerkleNode node = new MerkleNode(combinedHash, parents.get(k), parents.get(k+1));
 
                 parents.add(node);
 //                System.out.println(node);
@@ -109,13 +128,36 @@ public class MerkleTree {
         //set the merkle root to the last element in the parents array list
         //TODO this will need to be updated once we have our Transaction Class, we should be hashing the entire object
 
-        byte[] combinedHash = getHash((parents.get(parents.size() -2).getUnHashedData() + parents.get(parents.size() -1).getUnHashedData()));
+        byte[] combinedHash = getDataForHashing(parents.get(parents.size() -2).getData(), parents.get(parents.size() -1).getData());
+//        byte[] combinedHash = getHash((parents.get(parents.size() -2).getUnHashedData() + parents.get(parents.size() -1).getUnHashedData()));
 //        byte[] combinedHash = SHAUtils.concatenateHash(parents.get(parents.size() -2).getUnHashedData().getBytes(StandardCharsets.UTF_8),
 //                parents.get(parents.size() -1).getUnHashedData().getBytes(StandardCharsets.UTF_8),
 //                hashingAlgorithm);
 
-        this.merkleRoot = new MerkleNode(combinedHash, parents.get(parents.size() -2).getUnHashedData() + parents.get(parents.size() -1).getUnHashedData(), parents.get(parents.size() -2), parents.get(parents.size() -1));
+        this.merkleRoot = new MerkleNode(combinedHash, parents.get(parents.size() -2), parents.get(parents.size() -1));
 
+    }
+
+    private byte[] getDataForHashing(byte[] leftHash, byte[] rightHash){
+        byte[] newByte = new byte[leftHash.length + rightHash.length];
+        ArrayList<Byte> combinedBytes = new ArrayList<>(leftHash.length + rightHash.length);
+
+        for (Byte b : leftHash) {
+            combinedBytes.add(b);
+        }
+
+        for (Byte b : rightHash){
+            combinedBytes.add(b);
+        }
+
+        for (int i = 0; i < combinedBytes.size(); i++) {
+            newByte[i] = combinedBytes.get(i);
+        }
+
+        String encodedString = Base64.getEncoder().encodeToString(newByte);
+
+
+       return getHash(encodedString);
     }
 
     public void printMerkleTree(){
@@ -149,17 +191,16 @@ public class MerkleTree {
         for (int i = 0; i < leafs.size() ; i+=2) {
 
             //TODO this will need to be updated once we have our Transaction Class, we should be hashing the entire object
-            byte[] combinedHash = getHash((leafs.get(i).getUnHashedData() + leafs.get(i+1).getUnHashedData()));
+//            byte[] combinedHash = getHash((leafs.get(i).getData() + leafs.get(i+1).getData()));
+            byte[] combinedHash = getDataForHashing(leafs.get(i).getData(), leafs.get(i+1).getData());
 
 //            byte[] combinedHash = SHAUtils.concatenateHash(leafs.get(i).getData(),
 //                                                            leafs.get(i+1).getData(),
 //                                                            hashingAlgorithm);
             MerkleNode directParent = new MerkleNode(combinedHash,
-                                                        leafs.get(i).getUnHashedData() + leafs.get(i+1).getUnHashedData(),
                                                         leafs.get(i),
                                                         leafs.get(i+1));
             parents.add(directParent);
-            System.out.println(directParent.getUnHashedData());
         }
 
     }
@@ -168,13 +209,21 @@ public class MerkleTree {
         return SHAUtils.digest(data.getBytes(StandardCharsets.UTF_8), hashingAlgorithm);
     }
 
-    public static void main(String[] args) throws IOException {
-//        String[] strings = new String[]{"A", "B", "C", "D", "E", "F", "G", "H"};
-//        ArrayList<String> test = new ArrayList<String>(
-//                Arrays.asList(strings)
-//                );
+    public MerkleNode getMerkleRoot() {
+        return merkleRoot;
+    }
 
-        Transaction tx1 = new Transaction("Test1", 2.00);
+    public void setMerkleRoot(MerkleNode merkleRoot) {
+        this.merkleRoot = merkleRoot;
+    }
+/*
+    public static void main(String[] args) throws IOException {
+        String[] strings = new String[]{"A", "B", "C", "D", "E", "F", "G", "H"};
+        ArrayList<String> test = new ArrayList<String>(
+                Arrays.asList(strings)
+                );
+
+        Transaction tx1 = new Transaction("Test1".getBytes(StandardCharsets.UTF_8), 2.00);
         Transaction tx2 = new Transaction("Test2", 3.00);
         Transaction tx3 = new Transaction("Test3", 4.00);
         Transaction tx4 = new Transaction("Test4", 5.00);
@@ -185,7 +234,7 @@ public class MerkleTree {
                 Arrays.asList(tx1, tx2, tx3, tx4, tx5, tx6)
         );
 
-//        System.out.println(test);
+        System.out.println(test);
 
         MerkleTree tree = new MerkleTree(txs);
 
@@ -193,7 +242,7 @@ public class MerkleTree {
 
         System.out.println(tree.merkleRoot.getUnHashedData());
         System.out.println(tree.merkleRoot);
-
     }
+*/
 
 }

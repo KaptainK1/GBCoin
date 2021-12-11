@@ -1,4 +1,4 @@
-package com.uwgb.GBCoin.Exceptions;
+package com.uwgb.GBCoin.API.Exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
