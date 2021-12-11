@@ -14,19 +14,19 @@ import java.util.*;
 public class TransactionPool {
 
     private List<Transaction> transactionList;
-    private TransactionHandler transactionHandler;
+//    private TransactionHandler transactionHandler;
     private UTXOPool utxoPool;
 
     public TransactionPool(ArrayList<Transaction> transactions, UTXOPool pool){
         transactionList = new ArrayList<>(transactions);
         utxoPool = pool;
-        transactionHandler= new TransactionHandler(pool);
+//        transactionHandler= new TransactionHandler(pool);
     }
 
     public TransactionPool(UTXOPool pool){
         transactionList = new ArrayList<>();
         utxoPool = pool;
-        transactionHandler= new TransactionHandler(pool);
+//        transactionHandler= new TransactionHandler(pool);
     }
 
     public void addTransaction(Transaction t, byte[] hash){
@@ -182,11 +182,11 @@ public class TransactionPool {
         this.transactionList.clear();
     }
 
-    public void removeConsumedCoins(List<Transaction> transactions){
-        for (Transaction tx: transactions) {
-            this.transactionHandler.removeConsumedCoins(tx);
-        }
-    }
+//    public void removeConsumedCoins(List<Transaction> transactions){
+//        for (Transaction tx: transactions) {
+//            this.transactionHandler.removeConsumedCoins(tx);
+//        }
+//    }
 
     public List<Transaction> getTransactionList() {
         return transactionList;
@@ -196,13 +196,13 @@ public class TransactionPool {
         this.transactionList = transactionList;
     }
 
-    public TransactionHandler getTransactionHandler() {
-        return transactionHandler;
-    }
-
-    public void setTransactionHandler(TransactionHandler transactionHandler) {
-        this.transactionHandler = transactionHandler;
-    }
+//    public TransactionHandler getTransactionHandler() {
+//        return transactionHandler;
+//    }
+//
+//    public void setTransactionHandler(TransactionHandler transactionHandler) {
+//        this.transactionHandler = transactionHandler;
+//    }
 
     public UTXOPool getUtxoPool() {
         return utxoPool;

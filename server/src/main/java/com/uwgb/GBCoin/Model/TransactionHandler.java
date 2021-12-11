@@ -41,7 +41,14 @@ public class TransactionHandler {
         //loop through all inputs apart of the transaction
         for (Transaction.Input input: inputs) {
 
+            //first we need to check if the transaction is an instance of a coinbase transaction
+            //as there are certain properties we need to check for them
             if (!(transaction instanceof CoinbaseTransaction)) {
+                //Check to see if the coinbase transaction amount is bigger than the calculated amount
+                //If it is, then this is a malicious coinbase transaction and will be rejected.
+                if (transaction.getOutputs().get(0).getValue() > CoinbaseTransaction.calculateBlockReward()) {
+                    return false;
+                }
                 //check 1: see if the transaction input is available to be spent
                 if (!isConsumedCoinAvailable(input)){
                     return false;
@@ -60,17 +67,10 @@ public class TransactionHandler {
                 return true;
             }
 
-            //check 4: verify incorrect null address usage
-//            if (doesConsumedCoinHaveNullAddress(transaction)) {
-//                return false;
-//            }
-
             UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
             UTXO fromMemory = this.getUTXO(utxo);
             Transaction.Output correspondingOutput = utxoPool.getTxOutput(fromMemory);
             inputSum += correspondingOutput.getValue();
-
-//            this.utxoPool.removeUTXO(fromMemory);
 
             index++;
         }
@@ -87,7 +87,7 @@ public class TransactionHandler {
         }
 
         //check 4: to see if the outputs are greater than the total number of inputs
-        //if so, then this transaction
+        //if so, then this transaction is not valid as it is spending more than the inputs describe
         if (outputSum > inputSum){
             return false;
         }
@@ -192,8 +192,7 @@ public class TransactionHandler {
      * false if it doesn't exist
      */
     private boolean isConsumedCoinAvailable(Transaction.Input input){
-//        UTXOPool utxoPool = this.utxoPool;
-//        UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
+        UTXOPool utxoPool = new UTXOPool(this.utxoPool);
         UTXO utxo = new UTXO(input.getPrevTxHash(), input.getOutputIndex());
         UTXO foundUTXO = null;
         for (UTXO utxos: utxoPool.getUTXOs()) {
@@ -233,6 +232,7 @@ public class TransactionHandler {
             //if so, add the transaction to the accepted transaction list then,
             //remove those utxo coins and make new ones
             if (isValidTX(transaction)){
+                System.out.println(transaction);
                 acceptedTransactions.add(transaction);
                 removeConsumedCoins(transaction);
                 addCoinsToUTXOPool(transaction);

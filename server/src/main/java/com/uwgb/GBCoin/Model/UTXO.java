@@ -1,5 +1,7 @@
 package com.uwgb.GBCoin.Model;
 
+import com.uwgb.GBCoin.Utils.SHAUtils;
+
 import java.util.Arrays;
 
 /**
@@ -124,5 +126,16 @@ public class UTXO implements Comparable<UTXO>{
         this.index = index;
     }
 
+    @Override
+    public String toString(){
+        StringBuilder builder = new StringBuilder();
+        builder.append("\n");
+        builder.append("Hash of this UTXO:    ");
+        builder.append(SHAUtils.encodeBytes(getTxhash()));
+        builder.append("Output Index of this UTXO:   ");
+        builder.append(getIndex());
+        builder.append("\n");
+        return (builder.toString());
+    }
 
 }

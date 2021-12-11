@@ -125,10 +125,7 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
 
             if (Block.getBlockHeight() > blockChain.getBlockHeight() -1) {
                 if (HashCash.isValidSolution(challenge, nonce, 8)) {
-                    if (validateTransactions(block.getTransactions())) {
-                        return true;
-
-                    }
+                    return true;
                 }
             }
 
@@ -137,6 +134,13 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         }
     }
 
+    /**
+     * Method to check if the hash of a block is a valid hash
+     * @param prevBlockHash the prevBlockHash is the hash of the block BEFORE this block in the chain
+     * @param block the current block
+     * @return IF the prevBlockHash is equal to the block's prev Hash, then it is valid and the chain can continue
+     * so return true, if not, then this represents a break in the chain, so return false and don't add this block
+     */
     private boolean isHashValid(byte[] prevBlockHash, Block block){
         byte[] prevHash = Arrays.copyOf(prevBlockHash, prevBlockHash.length);
         byte[] currentBlockHash = Arrays.copyOf(block.getPreviousHash(), block.getPreviousHash().length);
@@ -165,32 +169,25 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     //IMiner interface functions
 
     /**
-     * Method to validate all transactions in the list
-     * @param transactions the list of transactions that need to be validated
-     * @return true if all transactions are valid
+     * Method to get an array of valid transactions given a set of PENDING transactions
+     * @param pendingTransactions that need to be valid
+     * @return returns an array of transactions that are valid
      */
     @Override
-    public boolean validateTransactions(ArrayList<Transaction> transactions) {
-        List<Transaction> acceptedTransactions = new ArrayList<>();
-//        for (Transaction tx: transactions){
-//            if (!transactionPool.getTransactionHandler().isValidTX(tx)){
-//                return false;
-//            }
-//            else {
-//                acceptedTransactions.add(tx);
-//            }
-//        }
-//        Transaction[] testTransactions = new Transaction[transactions.size()];
-//        transactions.toArray(testTransactions);
-//        Transaction[] results = transactionPool.getTransactionHandler().handleTransactions(testTransactions);
-        return true;
-    }
+    public Transaction[] getValidTransactions(List<Transaction> pendingTransactions){
+        //create a transaction handler
+        TransactionHandler txHandler = new TransactionHandler(this.getTransactionPool().getUtxoPool());
 
-    private Transaction[] getValidTransactions(List<Transaction> transactions){
-        Transaction[] testTransactions = new Transaction[transactions.size()];
-        transactions.toArray(testTransactions);
-        Transaction[] results = transactionPool.getTransactionHandler().handleTransactions(testTransactions);
-        return results;
+        //array to hold the Transactions that need to be verified
+        Transaction[] testTransactions = new Transaction[pendingTransactions.size()];
+
+        //convert to an array list
+        pendingTransactions.toArray(testTransactions);
+
+        //get the resulting array of transactions that are verified
+        //FYI this method also handles creating and removing coins (UTXOs)
+        return txHandler.handleTransactions(testTransactions);
+
     }
 
 //    @Override
@@ -219,6 +216,7 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
 
         //set Block to valid transactions
         Transaction[] results = this.getValidTransactions(currentTransactions);
+
         ArrayList<Transaction> acceptedTransactions = new ArrayList<>(Arrays.stream(results).toList());
 
         //create the block
@@ -241,7 +239,6 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         //set the miner network observable's block to the one we just found
         //this is necessary so other blocks can get this data.
 
-        //TODO pass the block object as a parameter instead
         minerNetwork.setNextBlock(block);
 
         //update all other miners of the new block that was found
@@ -256,6 +253,11 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     }
     // end IMiner interface functions
 
+    /**
+     * Method to add a coinbase transaction
+     * which is done when a miner successfully finds a new block
+     * @param transactions the list of transactions to where this coinbase transaction needs to be added to
+     */
     private void addCoinbaseTransaction(List<Transaction> transactions){
         CoinbaseTransaction coinbaseTransaction = new CoinbaseTransaction(this.getPublicKey());
         transactions.add(coinbaseTransaction);
