@@ -3,8 +3,8 @@ Setup JAVA JDK
 download Java JDK for Java 17
 https://www.oracle.com/java/technologies/downloads/#jdk17-windows
 
-Setup GSON library
+Setup Bouncy Castle library
 
 open IDE and import library
-Select the GSON jar file located in the ExtraJarFiles folder in this project
-gson-2.8.2.jar
+Select the bcprov jar file located in the Documents folder in this project
+bcprov-jdk15to18-169.jar

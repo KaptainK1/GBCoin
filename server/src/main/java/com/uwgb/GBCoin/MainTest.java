@@ -1,7 +1,5 @@
 package com.uwgb.GBCoin;
 
-import com.uwgb.GBCoin.API.Exceptions.TransactionException;
-import com.uwgb.GBCoin.API.Services.WalletService;
 import com.uwgb.GBCoin.Miner.Miner;
 import com.uwgb.GBCoin.Miner.MinerNetwork;
 import com.uwgb.GBCoin.Model.*;
@@ -90,7 +88,7 @@ public class MainTest {
     }
 
 
-    private static void generateTransactions(Wallet spender, Wallet receiver, int numberOfTransactions, TransactionPool transactionPool) throws TransactionException, NoSuchAlgorithmException, SignatureException, IOException, InvalidKeyException {
+    private static void generateTransactions(Wallet spender, Wallet receiver, int numberOfTransactions, TransactionPool transactionPool) throws Exception {
 
         for (int i = 0; i < numberOfTransactions; i++) {
             double maxSpendAmount = transactionPool.getTotalCoins(spender.getPublicKey());

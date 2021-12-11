@@ -1,7 +1,5 @@
 package com.uwgb.GBCoin.Model;
 
-import com.uwgb.GBCoin.API.Repositories.WalletRepository;
-import com.uwgb.GBCoin.API.Services.WalletService;
 import org.hibernate.annotations.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,19 +14,18 @@ import java.util.Collections;
  * the private key needs to be kept safe, as it is used to sign transactions
  * the public key can be distributed as it is the form of address
  */
-@Entity
-@Table(name = "wallets")
+//@Entity
+//@Table(name = "wallets")
 public class Wallet {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long ID;
-
-    //@Type(type = "com.uwgb.GBCoin.MSQLHelpers.Key")
-    @Lob
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private long ID;
+//
+//    @Lob
     private final PublicKey publicKey;
-
-    @Lob
+//
+//    @Lob
     private final PrivateKey privateKey;
 
     public Wallet() throws Exception {

@@ -1,6 +1,5 @@
 package com.uwgb.GBCoin.Model;
 
-import com.uwgb.GBCoin.Interfaces.Beautify;
 import com.uwgb.GBCoin.Interfaces.HashHelper;
 import com.uwgb.GBCoin.Utils.Crypto;
 import com.uwgb.GBCoin.Utils.SHAUtils;
@@ -14,7 +13,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Transaction implements HashHelper, Beautify {
+public class Transaction implements HashHelper {
 
         // The Inner Output class represents outgoing spend transactions
         // so, we need the Public Key of whom the payment should go to

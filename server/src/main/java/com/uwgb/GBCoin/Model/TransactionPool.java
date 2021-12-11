@@ -1,6 +1,5 @@
 package com.uwgb.GBCoin.Model;
 
-import com.uwgb.GBCoin.API.Exceptions.TransactionException;
 import com.uwgb.GBCoin.Utils.Crypto;
 import com.uwgb.GBCoin.Utils.SHAUtils;
 
@@ -57,7 +56,7 @@ public class TransactionPool {
      * @param spender the full wallet of the spender
      * @param receiverKeys hashmap with the receiver keys and values
      */
-    public void spendNewTransaction(double amount, Wallet spender, HashMap<PublicKey, Double> receiverKeys) throws TransactionException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException {
+    public void spendNewTransaction(double amount, Wallet spender, HashMap<PublicKey, Double> receiverKeys) throws Exception {
         double utxoAmount = 0.0d;
 
         ArrayList<UTXO> utxos = getUTXOSetToSpend((amount), spender.getPublicKey());
@@ -68,7 +67,7 @@ public class TransactionPool {
         //so throw a transaction exception
         if (pickedUTXOs.length < 1){
             System.out.println("payment cant proceed, no utxo's were round under this wallet");
-            throw new TransactionException("Error with submitting new transaction");
+            throw new Exception("Error with submitting new transaction");
         }
 
         //create a new transaction object

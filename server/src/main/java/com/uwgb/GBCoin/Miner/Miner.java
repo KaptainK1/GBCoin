@@ -1,6 +1,5 @@
 package com.uwgb.GBCoin.Miner;
 
-import com.uwgb.GBCoin.API.Services.WalletService;
 import com.uwgb.GBCoin.Interfaces.IMiner;
 import com.uwgb.GBCoin.Interfaces.IMinerObserver;
 import com.uwgb.GBCoin.Interfaces.ITransactionObserver;
