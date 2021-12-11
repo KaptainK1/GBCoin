@@ -84,6 +84,9 @@ public class MainTest {
                 System.out.println(utxo);
             }
 
+            System.out.println(miner1.getTransactionPool().getTotalCoins(miner1.getPublicKey()));
+            System.out.println(miner1.getTransactionPool().getTotalCoins(miner2.getPublicKey()));
+
         }
     }
 

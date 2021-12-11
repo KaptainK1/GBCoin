@@ -11,7 +11,9 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-
+/**
+ * The Merkle Tree data structure which will consist of Merkle Nodes
+ */
 public class MerkleTree {
 
     public MerkleNode merkleRoot;
@@ -21,6 +23,11 @@ public class MerkleTree {
     private List<MerkleNode> leafs = new ArrayList<>();
     private ArrayList<MerkleNode> parents = new ArrayList<>();
 
+    /**
+     * Constructor to create a MerkleTree
+     * @param unspentTransactions the unspent transactions that need to be added
+     * @throws IOException if the hashing alg doesn't exist
+     */
     public MerkleTree(ArrayList<Transaction> unspentTransactions) throws IOException {
 
         this.size = unspentTransactions.size();
@@ -75,7 +82,9 @@ public class MerkleTree {
 
     }
 
-    //function to build the Merkle Tree from the bottom up
+    /**
+     * function to build the Merkle Tree from the bottom up
+     */
     public void buildMerkleTree(){
 
         //function to create the immediate parents to our Transaction data blocks
@@ -170,9 +179,13 @@ public class MerkleTree {
 
     }
 
-    //simple recursive print method for printing the merkle tree
-    //start at the furthest left node, print it, then print its parent
-    //then print the parent's right child and percolate up the tree
+    /**
+     *  simple recursive print method for printing the merkle tree
+     *  start at the furthest left node, print it, then print its parent
+     *  then print the parent's right child and percolate up the tree
+     * @param node the node we want to print
+     */
+
     public void printInOrder(MerkleNode node){
         if (node == null)
             return;
@@ -185,7 +198,9 @@ public class MerkleTree {
         printInOrder(node.getRight());
     }
 
-    //function to create the direct parents of the Transaction (i.e data blocks)
+    /**
+     * function to create the direct parents of the Transaction (i.e data blocks)
+     */
     private void createDirectParents(){
 
         for (int i = 0; i < leafs.size() ; i+=2) {

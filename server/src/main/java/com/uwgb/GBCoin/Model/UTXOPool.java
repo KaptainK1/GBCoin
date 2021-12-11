@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+/**
+ * the UTXOPool is a data structure to hold all the transaction outputs
+ * that are currently available to be spent.
+ */
 public class UTXOPool {
 
-    /**
-     * the UTXOPool is a data structure to hold all the transaction outputs
-     * that are currently available to be spent.
-     */
     private HashMap<UTXO, Transaction.Output> utxoPool;
 
     public UTXOPool(){

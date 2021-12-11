@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.util.Arrays;
 
-
+/**
+ * A CoinbaseTransaction is a transaction that is created when a miner finds a new block
+ * So they are rewarded with this transaction for their efforts
+ */
 public class CoinbaseTransaction extends Transaction{
 
     private static final byte[] nullAddress = new byte[32];

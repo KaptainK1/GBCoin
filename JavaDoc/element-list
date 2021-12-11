@@ -1,0 +1,8 @@
+com.uwgb.GBCoin
+com.uwgb.GBCoin.Interfaces
+com.uwgb.GBCoin.MerkleTree
+com.uwgb.GBCoin.Miner
+com.uwgb.GBCoin.Model
+com.uwgb.GBCoin.ProofOfWork
+com.uwgb.GBCoin.test.java.com.uwgb.GBCoin
+com.uwgb.GBCoin.Utils

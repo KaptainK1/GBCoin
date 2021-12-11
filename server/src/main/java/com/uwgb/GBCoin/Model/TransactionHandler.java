@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * The TransactionHandler is responsible for verifying transactions and adding and creating new coins
+ */
 public class TransactionHandler {
 
     private UTXOPool utxoPool;

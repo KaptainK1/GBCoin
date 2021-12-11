@@ -9,13 +9,13 @@ import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import java.util.Collections;
 
+//@Entity
+//@Table(name = "wallets")
 /**
  * The wallet class will hold both private and public keys
  * the private key needs to be kept safe, as it is used to sign transactions
  * the public key can be distributed as it is the form of address
  */
-//@Entity
-//@Table(name = "wallets")
 public class Wallet {
 
 //    @Id

@@ -8,6 +8,10 @@ import com.uwgb.GBCoin.Interfaces.ITransactionObserver;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A TransactionNetwork is a basic subscriber/publisher pattern for new transactions
+ * This is not currently being used at the moment
+ */
 public class TransactionNetwork implements ITransactionObservable {
 
     private Transaction transaction;

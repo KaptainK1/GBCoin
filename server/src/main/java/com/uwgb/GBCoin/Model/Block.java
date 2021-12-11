@@ -16,6 +16,13 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * A single Block class which contains the block number,
+ * hash of the block,
+ * hash of the previous block
+ * transaction list
+ * and the merkle root
+ */
 public class Block implements HashHelper {
     private static int blockHeight = 0;
     private int blockNumber;
@@ -29,17 +36,13 @@ public class Block implements HashHelper {
     private long timeStamp;
     private long nonce;
 
-    //TODO need to implement this block class
-    //create a dummy block for testing purposes. remove this line and below code once implemented
-    public String name;
-    //public static int blockHeight = 0;
-
-    public Block(String name){
-        this.name = name;
-        ++blockHeight;
-    }
-    //
-
+    /**
+     * Constructor to create a new block
+     * @param publicKey the public key of the miner who solved it
+     * @param prevHash the hash of the previous block in the block chain
+     * @param timeStamp the current timestamp of the block
+     * @param transactions the valid transaction set to be included in this block
+     */
     public Block(PublicKey publicKey, byte[] prevHash, long timeStamp, List<Transaction> transactions) {
         this.blockNumber = blockHeight;
         if (prevHash == null){
@@ -77,6 +80,11 @@ public class Block implements HashHelper {
         setMerkleRoot(root.getData());
     }
 
+    /**
+     * Method to initial the transation set
+     * @param publicKey the public key of the miner who solved this puzzle
+     * @param txs the transaction list to include
+     */
     private void initTransactions(PublicKey publicKey, List<Transaction> txs){
 
         ArrayList<Transaction> transactions = new ArrayList<>(txs);
@@ -86,6 +94,10 @@ public class Block implements HashHelper {
         this.setTransactions(transactions);
     }
 
+    /**
+     * Method to hash the block
+     * @throws IOException if the hashing alg doesn't exist
+     */
     @Override
      public void hashObject() throws IOException {
         try {
@@ -97,6 +109,10 @@ public class Block implements HashHelper {
         }
     }
 
+    /**
+     * Method to convert the block into a byte array for hashing
+     * @return a byte array
+     */
     @Override
     public byte[] toByteArray(){
         ArrayList<Byte> bytes = new ArrayList<>();

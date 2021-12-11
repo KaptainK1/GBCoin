@@ -10,6 +10,10 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.*;
 
+/**
+ * The TransactionPool is responsible for managing transactions
+ * It can add transactions to the pool, get total coin amount and spend new transactions
+ */
 public class TransactionPool {
 
     private List<Transaction> transactionList;

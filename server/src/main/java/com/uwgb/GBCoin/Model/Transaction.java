@@ -13,6 +13,10 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * The Transaction class represents a GB Coin transaction
+ * A transaction features a list of Inputs, Outputs, and its own hash
+ */
 public class Transaction implements HashHelper {
 
         // The Inner Output class represents outgoing spend transactions
