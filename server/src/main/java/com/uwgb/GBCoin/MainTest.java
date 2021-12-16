@@ -73,6 +73,12 @@ public class MainTest {
             //we pick from WalletA > B because in the above scenario, we assume the genesis block was found by minerA
             generateTransactions(walletA, walletB, 1, miner1.getTransactionPool());
 
+            System.out.println("wallet A has: " + miner1.getTransactionPool().getTotalCoins(walletA.getPublicKey()) + " coins to spend!");
+
+            for (Transaction t : miner1.getTransactionPool().getTransactionList()) {
+                System.out.println(t);
+            }
+
             //run the mine block method
             miner1.mineNewBlock();
 

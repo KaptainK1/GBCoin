@@ -4,6 +4,7 @@ import com.uwgb.GBCoin.Utils.Crypto;
 import com.uwgb.GBCoin.Utils.SHAUtils;
 
 import java.io.IOException;
+import java.lang.invoke.LambdaMetafactory;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -133,6 +134,8 @@ public class TransactionPool {
             System.out.println("currently, " + publicKey + " only has " + totalCoins );
             return null;
         }
+
+        System.out.println(SHAUtils.encodeBytes(publicKey.getEncoded()) + "\n" + " is spending " + amount + " coins!");
 
         ArrayList<UTXO> myUTXOs = new ArrayList<>();
         ArrayList<UTXO> publicUTXOs = utxoPool.getUTXOs();
