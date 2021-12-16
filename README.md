@@ -13,3 +13,6 @@ http://www.hashcash.org/
 
 Merkle Tree Data Structure
 https://link.springer.com/content/pdf/10.1007%2F3-540-48184-2_32.pdf
+
+Bitcoin and Cryptocurrency technologies: A comprehensive introduction
+https://bitcoinbook.cs.princeton.edu/
