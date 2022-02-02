@@ -8,8 +8,11 @@ import com.uwgb.GBCoin.ProofOfWork.HashCash;
 import com.uwgb.GBCoin.Utils.SHAUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Array;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.security.PublicKey;
 import java.util.*;
 
@@ -23,6 +26,7 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
     private MinerNetwork minerNetwork;
     private TransactionNetwork transactionNetwork;
     private BlockChain blockChain;
+    private List<Miner> connectedMiners;
 
     private TransactionPool transactionPool;
     private List<Transaction> newTransactions;
@@ -46,11 +50,18 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
         this.transactionPool = new TransactionPool(utxoPool);
         this.currentTransactions = new ArrayList<>();
         this.newTransactions = new ArrayList<>();
+        this.connectedMiners = new LinkedList<>();
     }
 
 //    public void setAdjacentMiners(HashSet<Miner> adjacentMiners) {
 //        this.adjacentMiners = adjacentMiners;
 //    }
+
+    public void shareNetworkTransaction(Transaction transaction){
+        for (Miner miner: connectedMiners) {
+
+        }
+    }
 
     /**
      * Method to get the public key
@@ -323,5 +334,39 @@ public class Miner implements IMinerObserver, IMiner, ITransactionObserver {
 
     public BlockChain getBlockChain(){
         return this.blockChain;
+    }
+
+    public static void main(String[] args) {
+        //Begin Network Variables
+        ServerSocket server = null;
+        try {
+            server = new ServerSocket(8000);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Socket socket = null;
+         InputStreamReader inputStreamReader = null;
+         OutputStreamWriter outputStreamWriter = null;
+         BufferedWriter bufferedWriter = null;
+         BufferedReader bufferedReader = null;
+
+         try {
+             assert server != null;
+             socket = server.accept();
+             inputStreamReader = new InputStreamReader(socket.getInputStream());
+             outputStreamWriter = new OutputStreamWriter(socket.getOutputStream());
+
+             bufferedReader = new BufferedReader(inputStreamReader);
+             bufferedWriter = new BufferedWriter(outputStreamWriter);
+
+             while (true){
+
+             }
+
+
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+
     }
 }
