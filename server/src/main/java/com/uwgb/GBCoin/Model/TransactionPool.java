@@ -37,6 +37,12 @@ public class TransactionPool {
         transactionList.add(t);
 
     }
+    
+    public void addTransaction(Transaction t, byte[] hash, TransactionNetwork network) {
+    	transactionList.add(t);
+    	network.setTransaction(t);
+    	network.notifyObserver();
+    }
 
     /**
      * method to get a wallet's total number of coins
