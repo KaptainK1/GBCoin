@@ -116,7 +116,7 @@ public class Driver {
 				printWallets(walletList);
 
         		System.out.print("Enter a wallet address to pay: ");
-				printWallets(walletList);
+
         		String address = scanner.nextLine();
 
         		Wallet payee = getWallet(address, walletList);
@@ -126,7 +126,7 @@ public class Driver {
         			miner1.getTransactionPool().spendNewTransaction(amount, walletA, data);
         			
         		} else {
-        			System.out.print("Error with wallet address");
+        			System.out.print("Error with wallet address or spending amount \n");
         			break;
         		}
         		break;
@@ -142,8 +142,11 @@ public class Driver {
         		BlockChain.printBlockChain(miner1.getBlockChain());
         		break;
         	case (6):
-        		isFinished = true;
+        		miner1.getTransactionPool().printAllAvailableUTXOs();
         		break;
+			case (7):
+				isFinished = true;
+				break;
     		default:
     			System.out.println("Unknown option selected");
         	}
@@ -195,7 +198,8 @@ public class Driver {
     	System.out.println("3: Print current wallet balance");
 		System.out.println("4: Print a different wallet balance");
     	System.out.println("5: Print state of the blockchain");
-    	System.out.println("6: Quit");
+		System.out.println("6: Print state of the UTXO Pool");
+    	System.out.println("7: Quit");
     }
 
 }

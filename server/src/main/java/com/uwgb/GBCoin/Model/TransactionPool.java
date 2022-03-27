@@ -119,7 +119,7 @@ public class TransactionPool {
             transaction.addSignature(sig, i);
         }
 
-        //now that each transaction.input is offically signed, and outputs added, we are ready to fully
+        //now that each transaction.input is officially signed, and outputs added, we are ready to fully
         //hash the transaction
         transaction.hashObject();
         this.addTransaction(transaction, transaction.getHash());
@@ -154,6 +154,15 @@ public class TransactionPool {
         }
 
         return myUTXOs;
+    }
+
+    public void printAllAvailableUTXOs(){
+        ArrayList<UTXO> publicUTXOs = utxoPool.getUTXOs();
+
+        for (UTXO utxo: publicUTXOs) {
+            Transaction.Output output = utxoPool.getTxOutput(utxo);
+            System.out.println(output);
+        }
     }
 
     private UTXO[] pickCoinsToSpend (ArrayList<UTXO> utxos, double amount){
