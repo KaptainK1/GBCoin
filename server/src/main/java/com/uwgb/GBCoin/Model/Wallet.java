@@ -1,9 +1,6 @@
 package com.uwgb.GBCoin.Model;
 
-import org.hibernate.annotations.Type;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.*;
 import java.security.*;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
@@ -27,6 +24,8 @@ public class Wallet {
 //
 //    @Lob
     private final PrivateKey privateKey;
+
+    private String uniqueID;
 
     public Wallet() throws Exception {
 
@@ -58,6 +57,7 @@ public class Wallet {
 
     }
 
+
     /**
      * Get the public key from when the wallet object was instantiated
      * @return return the public key
@@ -72,5 +72,13 @@ public class Wallet {
      */
     public PrivateKey getPrivateKey() {
         return privateKey;
+    }
+
+    public String getUniqueID() {
+        return uniqueID;
+    }
+
+    public void setUniqueID(String uniqueID) {
+        this.uniqueID = uniqueID;
     }
 }

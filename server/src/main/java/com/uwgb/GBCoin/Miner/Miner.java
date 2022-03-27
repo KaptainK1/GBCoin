@@ -6,7 +6,7 @@ import com.uwgb.GBCoin.Interfaces.ITransactionObserver;
 import com.uwgb.GBCoin.Model.*;
 import com.uwgb.GBCoin.ProofOfWork.HashCash;
 import com.uwgb.GBCoin.Utils.SHAUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.lang.reflect.Array;

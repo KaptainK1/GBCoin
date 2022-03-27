@@ -3,7 +3,7 @@ package com.uwgb.GBCoin.Model;
 import com.uwgb.GBCoin.Interfaces.HashHelper;
 import com.uwgb.GBCoin.Utils.Crypto;
 import com.uwgb.GBCoin.Utils.SHAUtils;
-import org.jetbrains.annotations.NotNull;
+//import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -68,7 +68,7 @@ public class Transaction implements HashHelper {
             }
 
             @Override
-            public int compareTo(@NotNull Transaction.Output o) {
+            public int compareTo(Transaction.Output o) {
                     if (this.value < o.getValue()){
                         return -1;
                     } else if (this.value > o.getValue()){
